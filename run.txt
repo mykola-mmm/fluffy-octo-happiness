@@ -1,0 +1,3 @@
+python main.py --task preprocess --raw_csv_file  ./airbus-ship-detection/train_ship_segmentations_v2.csv --processed_csv_dir ./processed_csv
+
+python main.py --task train --processed_csv_file ./airbus-ship-detection/processed_train_ship_segmentations_v2.csv
