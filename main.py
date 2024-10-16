@@ -2,7 +2,7 @@ import sys
 import os
 
 # from src.data_loader import load_data
-from src.model.segmentation import UNet
+# from src.model.segmentation import UNet
 # from src.model.classification import ClassifierModel
 # from src.model.bigEarthNet import model as bigEarthNetModel 
 # from src.trainer import Trainer

@@ -1,15 +1,59 @@
-from tensorflow.keras.applications import VGG19, ResNet50
 import tensorflow as tf
+from tensorflow.keras.applications import VGG19
 
-class ClassifierModel(tf.keras.Model):
-    def __init__(self, input_shape=(768, 768, 3)):
-        super(ClassifierModel, self).__init__()
-        self.vgg19 = VGG19(weights='imagenet', include_top=False, input_shape=input_shape)
+class BinaryClassificationCNN(tf.keras.Model):
+    def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.5):
+        super().__init__()
+        self.input_shape = input_shape
+        self.vgg19 = VGG19(weights='imagenet', include_top=False, input_shape=self.input_shape)
+        
+        # Freeze VGG19 layers (Optional: could unfreeze some top layers for fine-tuning)
+        for layer in self.vgg19.layers:
+            layer.trainable = False
+        
+        # Adding custom layers
         self.flatten = tf.keras.layers.Flatten()
         self.fc1 = tf.keras.layers.Dense(4096, activation='relu')
+        self.dropout1 = tf.keras.layers.Dropout(dropout_rate)
         self.fc2 = tf.keras.layers.Dense(4096, activation='relu')
-        self.fc3 = tf.keras.layers.Dense(1000, activation='softmax')
-        
+        self.dropout2 = tf.keras.layers.Dropout(dropout_rate)
+        self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid')
+
+    def call(self, inputs, training=False):
+        x = self.vgg19(inputs)
+        x = self.flatten(x)
+        x = self.fc1(x)
+        x = self.dropout1(x, training=training)
+        x = self.fc2(x)
+        x = self.dropout2(x, training=training)
+        x = self.output_layer(x)
+        return x
+
+    def compile_model(self, learning_rate=0.001):
+        self.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+                     loss='binary_crossentropy',
+                     metrics=['accuracy'])
+
+    def train(self, train_data, train_labels, validation_data, epochs=10, batch_size=32):
+        self.history = self.fit(
+            train_data,
+            train_labels,
+            epochs=epochs,
+            batch_size=batch_size,
+            validation_data=validation_data
+        )
 
     def summary(self):
-        return self.vgg19.summary()
+        inputs = tf.keras.Input(shape=self.input_shape)
+        model = tf.keras.Model(inputs=inputs, outputs=self.call(inputs))
+        model.summary()
+
+
+    def summary_vgg(self):
+        self.vgg19.summary()
+
+
+if __name__ == "__main__":
+    model = BinaryClassificationCNN()
+    model.summary()
+    model.summary_vgg()
