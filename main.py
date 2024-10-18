@@ -45,7 +45,15 @@ def main():
         # images, labels = next(train_loader)
         # print(images.shape, labels.shape)
 
-        model.compile_model(learning_rate=0.001)
+        total_samples = len(y_train)
+        num_zero = (y_train == 0).sum()
+        num_one = (y_train == 1).sum()
+        weight_zero = (1 / num_zero) * (total_samples / 2.0)
+        weight_one = (1 / num_one) * (total_samples / 2.0)
+
+        logger.info(f"Class weights - Zero: {weight_zero:.4f}, One: {weight_one:.4f}")
+
+        model.compile_model(learning_rate=0.001, weight_zero=0.5, weight_one=0.5)
         model.train(train_loader, validation_loader, epochs=2, df_len=len(df), batch_size=128)
 
     elif args.task == "train_segmentation":

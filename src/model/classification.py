@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras.applications import VGG19
+from src.utils.loss import weighted_binary_crossentropy
 
 class BinaryClassificationCNN(tf.keras.Model):
     def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.1):
@@ -44,9 +45,9 @@ class BinaryClassificationCNN(tf.keras.Model):
         x = self.output_layer(x)
         return x
 
-    def compile_model(self, learning_rate=0.001):
+    def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
         self.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-                     loss='binary_crossentropy',
+                     loss=weighted_binary_crossentropy(weight_zero, weight_one),
                      metrics=['accuracy'])
 
     def train(self, data_loader, validation_data, epochs=10, df_len=None, batch_size=32):
