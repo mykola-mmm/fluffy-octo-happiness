@@ -5,6 +5,7 @@ import random
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
+from tensorflow.keras import mixed_precision
 from sklearn.model_selection import train_test_split
 
 # from src.data_loader import load_data
@@ -20,6 +21,10 @@ from src.csv_preprocessor import preprocess_csv, get_ships_df, get_no_ships_df, 
 def main():
     # Parse command-line arguments
     args = parse_arguments()
+
+    # Set mixed precision policy
+    policy = mixed_precision.Policy('mixed_float16')
+    mixed_precision.set_global_policy(policy)
 
     # Set the log level as an environment variable
     os.environ['LOG_LEVEL'] = args.log_level
@@ -59,7 +64,7 @@ def main():
         logger.info(f"Class weights - Zero: {weight_zero:.4f}, One: {weight_one:.4f}")
 
         model.compile_model(learning_rate=0.001, weight_zero=0.5, weight_one=0.5)
-        model.train(train_loader, validation_loader, epochs=2, df_len=len(df), batch_size=CLASSIFICATION_BATCH_SIZE, save_path=args.classification_model_path)
+        model.train(train_loader, validation_loader, epochs=10, df_len=len(df), batch_size=CLASSIFICATION_BATCH_SIZE, save_path=args.classification_model_path)
 
     elif args.task == "test_classification":
         logger.info("Starting test_classification task...")
