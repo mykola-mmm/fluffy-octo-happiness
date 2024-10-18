@@ -25,8 +25,8 @@ def preprocess_csv(csv_file_path):
         logger.info("Added AllEncodedPixels column")
 
         # Drop HasShip and EncodedPixels columns
-        df = df.drop(columns=['HasShip', 'EncodedPixels'])
-        logger.info("Dropped HasShip and EncodedPixels columns")
+        df = df.drop(columns=['EncodedPixels'])
+        logger.info("Dropped and EncodedPixels columns")
 
         # Drop duplicates based on ImageId and keep the first unique value
         df = df.drop_duplicates(subset=['ImageId'], keep='first')

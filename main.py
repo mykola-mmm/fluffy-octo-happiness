@@ -1,9 +1,13 @@
 import sys
 import os
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
 
 # from src.data_loader import load_data
 # from src.model.segmentation import UNet
-# from src.model.classification import ClassifierModel
+from src.model.classification import BinaryClassificationCNN
+from src.data_loader import classification_data_loader
 # from src.model.bigEarthNet import model as bigEarthNetModel 
 # from src.trainer import Trainer
 from src.utils import setup_logging, get_log_level, parse_arguments
@@ -27,10 +31,22 @@ def main():
     logger.info(f"Task: {args.task}")
 
     # Add your main application logic here
-    if args.task == "train":
-        logger.info("Starting training task...")
-        model = UNet()
-        model.summary()
+    if args.task == "train_classification":
+        logger.info("Starting train_classification task...")
+        model = BinaryClassificationCNN()
+        df_ships = pd.read_csv(os.path.join(args.processed_csv_dir, "df_ships.csv"))
+        df_no_ships = pd.read_csv(os.path.join(args.processed_csv_dir, "df_no_ships.csv"))
+
+        df = pd.concat([df_ships, df_no_ships], ignore_index=True)
+        x_train, x_val, y_train, y_val = train_test_split(df['ImageId'], df['HasShip'], test_size=0.2, stratify=df['HasShip'], random_state=42)
+
+        train_loader = classification_data_loader(x_train, y_train, args.dataset_path)
+        images, labels = next(train_loader)
+        print(images.shape, labels.shape)
+        
+
+    elif args.task == "train_segmentation":
+        logger.info("Starting train_segmentation task...")
 
         
     elif args.task == "infer":

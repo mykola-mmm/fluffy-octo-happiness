@@ -10,7 +10,11 @@ class BinaryClassificationCNN(tf.keras.Model):
         # Freeze VGG19 layers (Optional: could unfreeze some top layers for fine-tuning)
         for layer in self.vgg19.layers:
             layer.trainable = False
-        
+
+        # Addding extra conv layers to reduce the number of parameters 
+        self.conv_block1 = self._create_vgg19_conv_block()
+        self.conv_block2 = self._create_vgg19_conv_block()
+
         # Adding custom layers
         self.flatten = tf.keras.layers.Flatten()
         self.fc1 = tf.keras.layers.Dense(4096, activation='relu')
@@ -19,8 +23,19 @@ class BinaryClassificationCNN(tf.keras.Model):
         self.dropout2 = tf.keras.layers.Dropout(dropout_rate)
         self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid')
 
+    def _create_vgg19_conv_block(self, num_filters=512):
+        return tf.keras.Sequential([
+            tf.keras.layers.Conv2D(num_filters, (3, 3), activation='relu', padding='same'),
+            tf.keras.layers.Conv2D(num_filters, (3, 3), activation='relu', padding='same'),
+            tf.keras.layers.Conv2D(num_filters, (3, 3), activation='relu', padding='same'),
+            tf.keras.layers.Conv2D(num_filters, (3, 3), activation='relu', padding='same'),
+            tf.keras.layers.MaxPooling2D((2, 2))
+        ])
+
     def call(self, inputs, training=False):
         x = self.vgg19(inputs)
+        x = self.conv_block1(x)
+        x = self.conv_block2(x)
         x = self.flatten(x)
         x = self.fc1(x)
         x = self.dropout1(x, training=training)

@@ -8,15 +8,17 @@ def parse_arguments():
     parser.add_argument("--dataset_path", type=str, help="Path to the input data")
     parser.add_argument("--log_level", type=str, choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                         default="INFO", help="Set the logging level")
-    parser.add_argument("--task", type=str, choices=["train", "infer", "preprocess"],
-                        required=True, help="Choose the task to perform: train, infer, or preprocess data")
+    parser.add_argument("--task", type=str, choices=["train_classification", "train_segmentation", "infer", "preprocess"],
+                        required=True, help="Choose the task to perform: train_classification, train_segmentation, infer, or preprocess data")
     parser.add_argument("--raw_csv_file", type=str, help="Path to the raw CSV file for preprocessing")
     parser.add_argument("--processed_csv_dir", type=str, help="Path to save the processed CSV files")
 
     args = parser.parse_args()
     
-    if args.task == "train" and not args.processed_csv_dir:
-        parser.error("--processed_csv_dir is required when --task is set to train")
+    if args.task == "train_classification" and not args.processed_csv_dir:
+        parser.error("--processed_csv_dir is required when --task is set to train_classification")
+    if args.task == "train_segmentation" and not args.processed_csv_dir:
+        parser.error("--processed_csv_dir is required when --task is set to train_segmentation")
 
     if args.task == "preprocess":
         if not args.raw_csv_file:
