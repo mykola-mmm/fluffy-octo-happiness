@@ -55,15 +55,23 @@ def main():
         # images, labels = next(train_loader)
         # print(images.shape, labels.shape)
 
+        # Generate class weights because of imbalanced dataset
         total_samples = len(y_train)
         num_zero = (y_train == 0).sum()
         num_one = (y_train == 1).sum()
         weight_zero = (1 / num_zero) * (total_samples / 2.0)
         weight_one = (1 / num_one) * (total_samples / 2.0)
 
+        # Normalize weights to sum to 1
+        total_weight = weight_zero + weight_one
+        weight_zero /= total_weight
+        weight_one /= total_weight
+
         logger.info(f"Class weights - Zero: {weight_zero:.4f}, One: {weight_one:.4f}")
 
-        model.compile_model(learning_rate=0.001, weight_zero=0.5, weight_one=0.5)
+        model.compile_model(learning_rate=0.001, weight_zero=weight_zero, weight_one=weight_one)
+        # x, y = next(train_loader)
+        # print(x)
         model.train(train_loader, validation_loader, epochs=10, df_len=len(df), batch_size=CLASSIFICATION_BATCH_SIZE, save_path=args.classification_model_path)
 
     elif args.task == "test_classification":
@@ -83,7 +91,7 @@ def main():
             img = tf.io.read_file(image_path)
             img = tf.image.decode_image(img, channels=3)
             # img = tf.image.resize(img, (224, 224))
-            # img = tf.cast(img, tf.float32) / 255.0
+            img = tf.cast(img, tf.float32) / 255.0
             img_array = tf.expand_dims(img, axis=0)
 
             prediction = model.predict(img_array)

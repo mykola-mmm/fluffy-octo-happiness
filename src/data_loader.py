@@ -16,10 +16,12 @@ def classification_data_loader(df_x, df_y, dataset_path, batch_size=32):
                 image_path = os.path.join(dataset_path, f"{row['ImageId']}")
                 image = tf.io.read_file(image_path)
                 image = tf.image.decode_jpeg(image, channels=3)
+                image = tf.cast(image, tf.float32) / 255.0
                 images.append(image)
                 labels.append(row['HasShip'])
             yield tf.stack(images), tf.stack(labels)
 
 def classification_validation_data_loader(df_x, df_y, dataset_path, batch_size=32):
-    x, y = next(classification_data_loader(df_x, df_y, dataset_path, batch_size))
-    return (x, y)
+    while True:
+        x, y = next(classification_data_loader(df_x, df_y, dataset_path, batch_size))
+        yield (x, y)

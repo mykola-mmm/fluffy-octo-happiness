@@ -9,3 +9,4 @@ KAGGLE:
 
 %run main.py --task preprocess --raw_csv_file  /kaggle/input/airbus-ship-detection/train_ship_segmentations_v2.csv --processed_csv_dir /kaggle/working/processed_csv
 %run main.py --task train_classification --processed_csv_dir /kaggle/working/processed_csv --dataset_path /kaggle/input/airbus-ship-detection/train_v2 --classification_model_path /kaggle/working/classification_model
+%run main.py --task test_classification --dataset_path /kaggle/input/airbus-ship-detection/test_v2 --classification_model_path /kaggle/working/classification_model/best_model.weights.h5 --num_images 10
