@@ -33,6 +33,8 @@ def main():
     logger.info(f"Log level: {get_log_level()}")
     logger.info(f"Task: {args.task}")
 
+    CLASSIFICATION_BATCH_SIZE = 32
+
     # Add your main application logic here
     if args.task == "train_classification":
         logger.info("Starting train_classification task...")
@@ -43,8 +45,8 @@ def main():
         df = pd.concat([df_ships, df_no_ships], ignore_index=True)
         x_train, x_val, y_train, y_val = train_test_split(df['ImageId'], df['HasShip'], test_size=0.2, stratify=df['HasShip'], random_state=42)
 
-        train_loader = classification_data_loader(x_train, y_train, args.dataset_path, batch_size=32)
-        validation_loader = classification_validation_data_loader(x_val, y_val, args.dataset_path, batch_size=32)
+        train_loader = classification_data_loader(x_train, y_train, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
+        validation_loader = classification_validation_data_loader(x_val, y_val, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
         # images, labels = next(train_loader)
         # print(images.shape, labels.shape)
 
@@ -57,7 +59,7 @@ def main():
         logger.info(f"Class weights - Zero: {weight_zero:.4f}, One: {weight_one:.4f}")
 
         model.compile_model(learning_rate=0.001, weight_zero=0.5, weight_one=0.5)
-        model.train(train_loader, validation_loader, epochs=2, df_len=len(df), batch_size=128, save_path=args.classification_model_path)
+        model.train(train_loader, validation_loader, epochs=2, df_len=len(df), batch_size=CLASSIFICATION_BATCH_SIZE, save_path=args.classification_model_path)
 
     elif args.task == "test_classification":
         logger.info("Starting test_classification task...")
