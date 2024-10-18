@@ -54,7 +54,7 @@ def main():
         logger.info(f"Class weights - Zero: {weight_zero:.4f}, One: {weight_one:.4f}")
 
         model.compile_model(learning_rate=0.001, weight_zero=0.5, weight_one=0.5)
-        model.train(train_loader, validation_loader, epochs=2, df_len=len(df), batch_size=128)
+        model.train(train_loader, validation_loader, epochs=2, df_len=len(df), batch_size=128, save_path=args.classification_model_path)
 
     elif args.task == "train_segmentation":
         logger.info("Starting train_segmentation task...")

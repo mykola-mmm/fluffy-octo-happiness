@@ -1,3 +1,4 @@
+import os
 import tensorflow as tf
 from tensorflow.keras.applications import VGG19
 from src.loss import weighted_binary_crossentropy
@@ -50,9 +51,9 @@ class BinaryClassificationCNN(tf.keras.Model):
                      loss=weighted_binary_crossentropy(weight_zero, weight_one),
                      metrics=['accuracy'])
 
-    def train(self, data_loader, validation_data, epochs=10, df_len=None, batch_size=32):
+    def train(self, data_loader, validation_data, epochs=10, df_len=None, batch_size=32, save_path=None):
         # Create callbacks
-        checkpoint_path = "checkpoints/model_{epoch:02d}-{val_loss:.2f}.weights.h5"
+        checkpoint_path = os.path.join(save_path, "checkpoints/model_{epoch:02d}-{val_loss:.2f}.weights.h5")
         checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=checkpoint_path,
             save_weights_only=True,
@@ -91,8 +92,9 @@ class BinaryClassificationCNN(tf.keras.Model):
         )
 
         # Save the best model
-        best_model_path = "best_model.weights.h5"
+        best_model_path = os.path.join(save_path, "best_model.weights.h5")
         self.save_weights(best_model_path)
+        self.save(os.path.join(save_path, "best_model.keras"))
         print(f"Best model saved to {best_model_path}")
 
     def summary(self):
