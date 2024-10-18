@@ -1,10 +1,11 @@
-local:
+LOCAL:
 
 python main.py --task preprocess --raw_csv_file  ./airbus-ship-detection/train_ship_segmentations_v2.csv --processed_csv_dir ./processed_csv
 python main.py --task train_classification --processed_csv_dir ./processed_csv --dataset_path ./airbus-ship-detection/train_v2 --classification_model_path ./classification_model
+python main.py --task test_classification --dataset_path ./airbus-ship-detection/test_v2 --classification_model_path ./classification_model --num_images 100
 
 
-kaggle:
+KAGGLE:
 
 %run main.py --task preprocess --raw_csv_file  /kaggle/input/airbus-ship-detection/train_ship_segmentations_v2.csv --processed_csv_dir /kaggle/working/processed_csv
 %run main.py --task train_classification --processed_csv_dir /kaggle/working/processed_csv --dataset_path /kaggle/input/airbus-ship-detection/train_v2 --classification_model_path /kaggle/working/classification_model
