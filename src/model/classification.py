@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.applications import VGG19
 
 class BinaryClassificationCNN(tf.keras.Model):
-    def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.5):
+    def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.1):
         super().__init__()
         self.input_shape = input_shape
         self.vgg19 = VGG19(weights='imagenet', include_top=False, input_shape=self.input_shape)
@@ -49,14 +49,50 @@ class BinaryClassificationCNN(tf.keras.Model):
                      loss='binary_crossentropy',
                      metrics=['accuracy'])
 
-    def train(self, train_data, train_labels, validation_data, epochs=10, batch_size=32):
-        self.history = self.fit(
-            train_data,
-            train_labels,
-            epochs=epochs,
-            batch_size=batch_size,
-            validation_data=validation_data
+    def train(self, data_loader, validation_data, epochs=10, df_len=None, batch_size=32):
+        # Create callbacks
+        checkpoint_path = "checkpoints/model_{epoch:02d}-{val_loss:.2f}.weights.h5"
+        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+            filepath=checkpoint_path,
+            save_weights_only=True,
+            save_best_only=True,
+            monitor='val_loss',
+            mode='min',
+            verbose=1
         )
+
+        reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
+            monitor='val_loss',
+            factor=0.2,
+            patience=5,
+            min_lr=1e-6,
+            verbose=1
+        )
+
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(
+            log_dir='./logs',
+            histogram_freq=1,
+            write_graph=True,
+            write_images=True,
+            update_freq='epoch',
+            profile_batch=2
+        )
+
+        steps_per_epoch = df_len // batch_size
+
+        # Train the model
+        self.history = self.fit(
+            data_loader,
+            epochs=epochs,
+            steps_per_epoch=steps_per_epoch,
+            validation_data=validation_data,
+            callbacks=[checkpoint_callback, reduce_lr_callback, tensorboard_callback]
+        )
+
+        # Save the best model
+        best_model_path = "best_model.weights.h5"
+        self.save_weights(best_model_path)
+        print(f"Best model saved to {best_model_path}")
 
     def summary(self):
         inputs = tf.keras.Input(shape=self.input_shape)

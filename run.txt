@@ -1,3 +1,10 @@
-python main.py --task preprocess --raw_csv_file  ./airbus-ship-detection/train_ship_segmentations_v2.csv --processed_csv_dir ./processed_csv
+local:
 
-python main.py --task train --processed_csv_file ./airbus-ship-detection/processed_train_ship_segmentations_v2.csv
+python main.py --task preprocess --raw_csv_file  ./airbus-ship-detection/train_ship_segmentations_v2.csv --processed_csv_dir ./processed_csv
+python main.py --task train_classification --processed_csv_dir ./processed_csv --dataset_path ./airbus-ship-detection/train_v2
+
+
+kaggle:
+
+%run main.py --task preprocess --raw_csv_file  /kaggle/input/airbus-ship-detection/train_ship_segmentations_v2.csv --processed_csv_dir /kaggle/working/processed_csv
+%run main.py --task train_classification --processed_csv_dir /kaggle/working/processed_csv --dataset_path /kaggle/input/airbus-ship-detection/train_v2
