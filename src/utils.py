@@ -12,11 +12,17 @@ def parse_arguments():
                         required=True, help="Choose the task to perform: train_classification, train_segmentation, infer, or preprocess data")
     parser.add_argument("--raw_csv_file", type=str, help="Path to the raw CSV file for preprocessing")
     parser.add_argument("--processed_csv_dir", type=str, help="Path to save the processed CSV files")
+    parser.add_argument("--classification_model_path", type=str, help="Path to save the classification model and weights")
+
 
     args = parser.parse_args()
     
-    if args.task == "train_classification" and not args.processed_csv_dir:
-        parser.error("--processed_csv_dir is required when --task is set to train_classification")
+    if args.task == "train_classification" and (not args.processed_csv_dir or not args.classification_model_path):
+        if not args.processed_csv_dir:
+            parser.error("--processed_csv_dir is required when --task is set to train_classification")
+        if not args.classification_model_path:
+            parser.error("--classification_model_path is required when --task is set to train_classification")
+
     if args.task == "train_segmentation" and not args.processed_csv_dir:
         parser.error("--processed_csv_dir is required when --task is set to train_segmentation")
 

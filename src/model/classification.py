@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras.applications import VGG19
-from src.utils.loss import weighted_binary_crossentropy
+from src.loss import weighted_binary_crossentropy
 
 class BinaryClassificationCNN(tf.keras.Model):
     def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.1):
