@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 # from src.data_loader import load_data
 # from src.model.segmentation import UNet
 from src.model.classification import BinaryClassificationCNN
-from src.data_loader import classification_data_loader, classification_validation_data_loader
+from src.data_loader import classification_data_loader#, classification_validation_data_loader
 # from src.model.bigEarthNet import model as bigEarthNetModel 
 # from src.trainer import Trainer
 from src.utils import setup_logging, get_log_level, parse_arguments
@@ -51,7 +51,9 @@ def main():
         x_train, x_val, y_train, y_val = train_test_split(df['ImageId'], df['HasShip'], test_size=0.2, stratify=df['HasShip'], random_state=42)
 
         train_loader = classification_data_loader(x_train, y_train, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
-        validation_loader = classification_validation_data_loader(x_val, y_val, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
+        # validation_loader = classification_validation_data_loader(x_val, y_val, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
+        validation_loader = classification_data_loader(x_val, y_val, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE, validation=True)
+        
         # images, labels = next(train_loader)
         # print(images.shape, labels.shape)
 

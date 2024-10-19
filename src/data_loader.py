@@ -3,7 +3,7 @@ import pandas as pd
 import tensorflow as tf
 
 
-def classification_data_loader(df_x, df_y, dataset_path, batch_size=32):
+def classification_data_loader(df_x, df_y, dataset_path, batch_size=32, validation=False):
     df = pd.concat([df_x, df_y], axis=1)
     df = df.sample(frac=1,random_state=42).reset_index(drop=True)
     # print(df)
@@ -19,9 +19,12 @@ def classification_data_loader(df_x, df_y, dataset_path, batch_size=32):
                 image = tf.cast(image, tf.float32) / 255.0
                 images.append(image)
                 labels.append(row['HasShip'])
-            yield tf.stack(images), tf.stack(labels)
+            if not validation:
+                yield tf.stack(images), tf.stack(labels)
+            else:
+                yield (tf.stack(images), tf.stack(labels))
 
-def classification_validation_data_loader(df_x, df_y, dataset_path, batch_size=32):
-    while True:
-        x, y = next(classification_data_loader(df_x, df_y, dataset_path, batch_size))
-        yield (x, y)
+# def classification_validation_data_loader(df_x, df_y, dataset_path, batch_size=32):
+#     while True:
+#         x, y = next(classification_data_loader(df_x, df_y, dataset_path, batch_size))
+#         yield (x, y)
