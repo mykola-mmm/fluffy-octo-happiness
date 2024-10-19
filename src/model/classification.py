@@ -1,6 +1,7 @@
 import os
 import tensorflow as tf
 from tensorflow.keras.applications import VGG19
+from tensorflow.keras import mixed_precision
 from src.loss import weighted_binary_crossentropy
 
 class BinaryClassificationCNN(tf.keras.Model):
@@ -47,7 +48,10 @@ class BinaryClassificationCNN(tf.keras.Model):
         return x
 
     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
-        self.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+        optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+        # optimizer = mixed_precision.LossScaleOptimizer(optimizer)
+
+        self.compile(optimizer=optimizer,
                      loss=weighted_binary_crossentropy(weight_zero, weight_one),
                      metrics=['accuracy'])
 
