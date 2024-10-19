@@ -71,13 +71,6 @@ def main():
         logger.info(f"Class weights - Zero: {weight_zero:.4f}, One: {weight_one:.4f}")
 
         model.compile_model(learning_rate=0.001, weight_zero=weight_zero, weight_one=weight_one)
-        # x, y = next(train_loader)
-        # print(x)
-        # for i in range(5):
-        #     x, y = next(validation_loader)
-        #     print(x)
-        #     print(y)
-        #     print(i)
         model.train(train_loader,
                     validation_loader,
                     epochs=10,
