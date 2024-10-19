@@ -38,7 +38,7 @@ def main():
     logger.info(f"Log level: {get_log_level()}")
     logger.info(f"Task: {args.task}")
 
-    CLASSIFICATION_BATCH_SIZE = 8
+    CLASSIFICATION_BATCH_SIZE = 16
 
     # Add your main application logic here
     if args.task == "train_classification":
@@ -89,7 +89,7 @@ def main():
         model.summary()
         model.train(train_loader,
                     validation_loader,
-                    epochs=200,
+                    epochs=20,
                     train_df_len=len(x_train),
                     validation_df_len=len(x_val),
                     batch_size=CLASSIFICATION_BATCH_SIZE,
