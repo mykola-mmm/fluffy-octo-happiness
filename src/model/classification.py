@@ -51,13 +51,14 @@ class BinaryClassificationCNN(tf.keras.Model):
         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
         optimizer = mixed_precision.LossScaleOptimizer(optimizer)
 
+        # metrics = ['accuracy', 'recall', 'f1_score']
+        metrics = ['accuracy']
+
+
         self.compile(optimizer=optimizer,
                     #  loss=weighted_binary_crossentropy(weight_zero, weight_one),
                      loss = tf.keras.losses.BinaryCrossentropy(),
-                     metrics=['accuracy'])
-                    # metrics=['accuracy',
-                    #         tf.keras.metrics.Recall(),
-                    #         tf.keras.metrics.F1Score()])
+                     metrics=metrics)
 
     def train(self, data_loader, validation_data, epochs=10, train_df_len=None, validation_df_len=None, batch_size=32, save_path=None, weight_zero=0.5, weight_one=0.5):
         # Create callbacks
