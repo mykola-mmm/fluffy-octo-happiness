@@ -22,9 +22,9 @@ def main():
     # Parse command-line arguments
     args = parse_arguments()
 
-    # # Set mixed precision policy
-    # policy = mixed_precision.Policy('mixed_float16')
-    # mixed_precision.set_global_policy(policy)
+    # Set mixed precision policy
+    policy = mixed_precision.Policy('mixed_float16')
+    mixed_precision.set_global_policy(policy)
 
     # Set the log level as an environment variable
     os.environ['LOG_LEVEL'] = args.log_level
@@ -38,7 +38,7 @@ def main():
     logger.info(f"Log level: {get_log_level()}")
     logger.info(f"Task: {args.task}")
 
-    CLASSIFICATION_BATCH_SIZE = 16
+    CLASSIFICATION_BATCH_SIZE = 32
 
     # Add your main application logic here
     if args.task == "train_classification":
@@ -89,7 +89,7 @@ def main():
         model.summary()
         model.train(train_loader,
                     validation_loader,
-                    epochs=20,
+                    epochs=5,
                     train_df_len=len(x_train),
                     validation_df_len=len(x_val),
                     batch_size=CLASSIFICATION_BATCH_SIZE,
