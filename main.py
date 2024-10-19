@@ -85,7 +85,7 @@ def main():
 
         logger.info(f"Class weights - Zero: {weight_zero:.4f}, One: {weight_one:.4f}")
 
-        model.compile_model(learning_rate=0.001, weight_zero=weight_zero, weight_one=weight_one)
+        model.compile_model(learning_rate=0.0001, weight_zero=weight_zero, weight_one=weight_one)
         model.summary()
         model.train(train_loader,
                     validation_loader,
