@@ -52,10 +52,13 @@ class BinaryClassificationCNN(tf.keras.Model):
         optimizer = mixed_precision.LossScaleOptimizer(optimizer)
 
         self.compile(optimizer=optimizer,
-                     loss=weighted_binary_crossentropy(weight_zero, weight_one),
-                     metrics=['accuracy'])
+                    #  loss=weighted_binary_crossentropy(weight_zero, weight_one),
+                    loss = tf.keras.losses.BinaryCrossentropy(),
+                    metrics=['accuracy',
+                            tf.keras.metrics.Recall(),
+                            tf.keras.metrics.F1Score()])
 
-    def train(self, data_loader, validation_data, epochs=10, train_df_len=None, validation_df_len=None, batch_size=32, save_path=None):
+    def train(self, data_loader, validation_data, epochs=10, train_df_len=None, validation_df_len=None, batch_size=32, save_path=None, weight_zero=0.5, weight_one=0.5):
         # Create callbacks
         checkpoint_path = os.path.join(save_path, "checkpoints/model_{epoch:02d}-{val_loss:.2f}.weights.h5")
         # checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -94,8 +97,9 @@ class BinaryClassificationCNN(tf.keras.Model):
             steps_per_epoch=train_steps_per_epoch,
             validation_data=validation_data,
             validation_steps=val_steps_per_epoch,
-            callbacks=[reduce_lr_callback, tensorboard_callback]
-            # callbacks=[checkpoint_callback, reduce_lr_callback, tensorboard_callback]
+            callbacks=[reduce_lr_callback, tensorboard_callback],
+            # callbacks=[checkpoint_callback, reduce_lr_callback, tensorboard_callback],
+            class_weight={0: weight_zero, 1: weight_one}
         )
 
         # Save the best model

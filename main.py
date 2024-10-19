@@ -38,7 +38,7 @@ def main():
     logger.info(f"Log level: {get_log_level()}")
     logger.info(f"Task: {args.task}")
 
-    CLASSIFICATION_BATCH_SIZE = 16
+    CLASSIFICATION_BATCH_SIZE = 32
 
     # Add your main application logic here
     if args.task == "train_classification":
@@ -93,7 +93,9 @@ def main():
                     train_df_len=len(x_train),
                     validation_df_len=len(x_val),
                     batch_size=CLASSIFICATION_BATCH_SIZE,
-                    save_path=args.classification_model_path)
+                    save_path=args.classification_model_path,
+                    weight_zero=weight_zero,
+                    weight_one=weight_one)
 
     elif args.task == "test_classification":
         logger.info("Starting test_classification task...")
