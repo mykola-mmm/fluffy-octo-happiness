@@ -37,8 +37,8 @@ class BinaryClassificationCNN(tf.keras.Model):
 
     def call(self, inputs, training=False):
         x = self.vgg19(inputs)
-        # x = self.conv_block1(x)
-        # x = self.conv_block2(x)
+        x = self.conv_block1(x)
+        x = self.conv_block2(x)
         x = self.flatten(x)
         x = self.fc1(x)
         x = self.dropout1(x, training=training)
