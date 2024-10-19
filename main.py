@@ -73,7 +73,7 @@ def main():
         model.compile_model(learning_rate=0.001, weight_zero=weight_zero, weight_one=weight_one)
         model.train(train_loader,
                     validation_loader,
-                    epochs=10,
+                    epochs=200,
                     train_df_len=len(x_train),
                     validation_df_len=len(x_val),
                     batch_size=CLASSIFICATION_BATCH_SIZE,

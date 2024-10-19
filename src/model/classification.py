@@ -58,14 +58,14 @@ class BinaryClassificationCNN(tf.keras.Model):
     def train(self, data_loader, validation_data, epochs=10, train_df_len=None, validation_df_len=None, batch_size=32, save_path=None):
         # Create callbacks
         checkpoint_path = os.path.join(save_path, "checkpoints/model_{epoch:02d}-{val_loss:.2f}.weights.h5")
-        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-            filepath=checkpoint_path,
-            save_weights_only=True,
-            save_best_only=True,
-            monitor='val_loss',
-            mode='min',
-            verbose=1
-        )
+        # checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        #     filepath=checkpoint_path,
+        #     save_weights_only=True,
+        #     save_best_only=True,
+        #     monitor='val_loss',
+        #     mode='min',
+        #     verbose=1
+        # )
 
         reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
             monitor='val_loss',
@@ -94,7 +94,8 @@ class BinaryClassificationCNN(tf.keras.Model):
             steps_per_epoch=train_steps_per_epoch,
             validation_data=validation_data,
             validation_steps=val_steps_per_epoch,
-            callbacks=[checkpoint_callback, reduce_lr_callback, tensorboard_callback]
+            callbacks=[reduce_lr_callback, tensorboard_callback]
+            # callbacks=[checkpoint_callback, reduce_lr_callback, tensorboard_callback]
         )
 
         # Save the best model
