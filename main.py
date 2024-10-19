@@ -38,7 +38,7 @@ def main():
     logger.info(f"Log level: {get_log_level()}")
     logger.info(f"Task: {args.task}")
 
-    CLASSIFICATION_BATCH_SIZE = 4
+    CLASSIFICATION_BATCH_SIZE = 32
 
     # Add your main application logic here
     if args.task == "train_classification":
