@@ -53,17 +53,20 @@ def main():
         _train_loader = classification_data_loader(x_train, y_train, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
         _validation_loader = classification_validation_data_loader(x_val, y_val, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
 
-        train_loader = tf.data.Dataset.from_generator(
-            lambda: _train_loader,
-            output_types=(tf.float16, tf.int32),
-            output_shapes=((None, None, None, 3), (None,))
-        )
+        train_loader = _train_loader
+        validation_loader = _validation_loader
 
-        validation_loader = tf.data.Dataset.from_generator(
-            lambda: _validation_loader,
-            output_types=(tf.float16, tf.int32),
-            output_shapes=((None, None, None, 3), (None,))
-        )    
+        # train_loader = tf.data.Dataset.from_generator(
+        #     lambda: _train_loader,
+        #     output_types=(tf.float16, tf.int32),
+        #     output_shapes=((None, None, None, 3), (None,))
+        # )
+
+        # validation_loader = tf.data.Dataset.from_generator(
+        #     lambda: _validation_loader,
+        #     output_types=(tf.float16, tf.int32),
+        #     output_shapes=((None, None, None, 3), (None,))
+        # )    
         
         # images, labels = next(train_loader)
         # print(images.shape, labels.shape)
@@ -83,6 +86,7 @@ def main():
         logger.info(f"Class weights - Zero: {weight_zero:.4f}, One: {weight_one:.4f}")
 
         model.compile_model(learning_rate=0.001, weight_zero=weight_zero, weight_one=weight_one)
+        model.summary()
         model.train(train_loader,
                     validation_loader,
                     epochs=200,
