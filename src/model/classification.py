@@ -53,6 +53,7 @@ class BinaryClassificationCNN(tf.keras.Model):
 
         # metrics = ['accuracy', 'recall', 'f1_score']
         metrics = ['accuracy']
+        # metrics = [tf.keras.metrics.BinaryAccuracy()]
 
 
         self.compile(optimizer=optimizer,
