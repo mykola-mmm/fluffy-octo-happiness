@@ -78,7 +78,13 @@ def main():
         #     print(x)
         #     print(y)
         #     print(i)
-        model.train(train_loader, validation_loader, epochs=10, df_len=len(x_train), batch_size=CLASSIFICATION_BATCH_SIZE, save_path=args.classification_model_path)
+        model.train(train_loader,
+                    validation_loader,
+                    epochs=10,
+                    train_df_len=len(x_train),
+                    validation_df_len=len(x_val),
+                    batch_size=CLASSIFICATION_BATCH_SIZE,
+                    save_path=args.classification_model_path)
 
     elif args.task == "test_classification":
         logger.info("Starting test_classification task...")

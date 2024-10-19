@@ -51,7 +51,7 @@ class BinaryClassificationCNN(tf.keras.Model):
                      loss=weighted_binary_crossentropy(weight_zero, weight_one),
                      metrics=['accuracy'])
 
-    def train(self, data_loader, validation_data, epochs=10, df_len=None, batch_size=32, save_path=None):
+    def train(self, data_loader, validation_data, epochs=10, train_df_len=None, validation_df_len=None, batch_size=32, save_path=None):
         # Create callbacks
         checkpoint_path = os.path.join(save_path, "checkpoints/model_{epoch:02d}-{val_loss:.2f}.weights.h5")
         checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -80,14 +80,16 @@ class BinaryClassificationCNN(tf.keras.Model):
             profile_batch=2
         )
 
-        steps_per_epoch = df_len // batch_size
+        train_steps_per_epoch = train_df_len // batch_size
+        val_steps_per_epoch = validation_df_len // batch_size
 
         # Train the model
         self.history = self.fit(
             data_loader,
             epochs=epochs,
-            steps_per_epoch=steps_per_epoch,
+            steps_per_epoch=train_steps_per_epoch,
             validation_data=validation_data,
+            validation_steps=val_steps_per_epoch,
             callbacks=[checkpoint_callback, reduce_lr_callback, tensorboard_callback]
         )
 
