@@ -52,8 +52,10 @@ class BinaryClassificationCNN(tf.keras.Model):
         optimizer = mixed_precision.LossScaleOptimizer(optimizer)
 
         # metrics = ['accuracy', 'recall', 'f1_score']
-        metrics = ['accuracy']
-        # metrics = [tf.keras.metrics.BinaryAccuracy()]
+        # metrics = ['accuracy']
+        metrics = [
+            tf.keras.metrics.BinaryAccuracy(threshold=0.5, name='binary_accuracy_0.5'),
+        ]
 
 
         self.compile(optimizer=optimizer,
@@ -64,14 +66,14 @@ class BinaryClassificationCNN(tf.keras.Model):
     def train(self, data_loader, validation_data, epochs=10, train_df_len=None, validation_df_len=None, batch_size=32, save_path=None, weight_zero=0.5, weight_one=0.5):
         # Create callbacks
         checkpoint_path = os.path.join(save_path, "checkpoints/model_{epoch:02d}-{val_loss:.2f}.weights.h5")
-        # checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-        #     filepath=checkpoint_path,
-        #     save_weights_only=True,
-        #     save_best_only=True,
-        #     monitor='val_loss',
-        #     mode='min',
-        #     verbose=1
-        # )
+        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+            filepath=checkpoint_path,
+            save_weights_only=True,
+            save_best_only=True,
+            monitor='val_loss',
+            mode='min',
+            verbose=1
+        )
 
         reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
             monitor='val_loss',
@@ -100,8 +102,8 @@ class BinaryClassificationCNN(tf.keras.Model):
             steps_per_epoch=train_steps_per_epoch,
             validation_data=validation_data,
             validation_steps=val_steps_per_epoch,
-            callbacks=[reduce_lr_callback, tensorboard_callback],
-            # callbacks=[checkpoint_callback, reduce_lr_callback, tensorboard_callback],
+            # callbacks=[reduce_lr_callback, tensorboard_callback],
+            callbacks=[checkpoint_callback, reduce_lr_callback, tensorboard_callback],
             class_weight={0: weight_zero, 1: weight_one}
         )
 
