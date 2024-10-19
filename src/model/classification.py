@@ -52,8 +52,8 @@ class BinaryClassificationCNN(tf.keras.Model):
         optimizer = mixed_precision.LossScaleOptimizer(optimizer)
 
         self.compile(optimizer=optimizer,
-                    #  loss=weighted_binary_crossentropy(weight_zero, weight_one),
-                    loss = tf.keras.losses.BinaryCrossentropy(),
+                     loss=weighted_binary_crossentropy(weight_zero, weight_one),
+                    # loss = tf.keras.losses.BinaryCrossentropy(),
                     metrics=['accuracy',
                             tf.keras.metrics.Recall(),
                             tf.keras.metrics.F1Score()])
