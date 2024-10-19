@@ -48,7 +48,7 @@ class BinaryClassificationCNN(tf.keras.Model):
         return x
 
     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
-        optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+        optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
         optimizer = mixed_precision.LossScaleOptimizer(optimizer)
 
         # metrics = ['accuracy', 'recall', 'f1_score']
