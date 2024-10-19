@@ -10,9 +10,9 @@ class BinaryClassificationCNN(tf.keras.Model):
         self.input_shape = input_shape
         self.vgg19 = VGG19(weights='imagenet', include_top=False, input_shape=self.input_shape)
         
-        # Freeze VGG19 layers (Optional: could unfreeze some top layers for fine-tuning)
-        for layer in self.vgg19.layers:
-            layer.trainable = False
+        # # Freeze VGG19 layers (Optional: could unfreeze some top layers for fine-tuning)
+        # for layer in self.vgg19.layers:
+        #     layer.trainable = False
 
         # Addding extra conv layers to reduce the number of parameters 
         self.conv_block1 = self._create_vgg19_conv_block()
