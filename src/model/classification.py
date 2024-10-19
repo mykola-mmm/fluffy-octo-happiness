@@ -49,7 +49,7 @@ class BinaryClassificationCNN(tf.keras.Model):
 
     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
-        # optimizer = mixed_precision.LossScaleOptimizer(optimizer)
+        optimizer = mixed_precision.LossScaleOptimizer(optimizer)
 
         self.compile(optimizer=optimizer,
                      loss=weighted_binary_crossentropy(weight_zero, weight_one),

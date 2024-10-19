@@ -22,9 +22,9 @@ def main():
     # Parse command-line arguments
     args = parse_arguments()
 
-    # # Set mixed precision policy
-    # policy = mixed_precision.Policy('mixed_float16')
-    # mixed_precision.set_global_policy(policy)
+    # Set mixed precision policy
+    policy = mixed_precision.Policy('mixed_float16')
+    mixed_precision.set_global_policy(policy)
 
     # Set the log level as an environment variable
     os.environ['LOG_LEVEL'] = args.log_level
@@ -50,8 +50,20 @@ def main():
         df = pd.concat([df_ships, df_no_ships], ignore_index=True)
         x_train, x_val, y_train, y_val = train_test_split(df['ImageId'], df['HasShip'], test_size=0.2, stratify=df['HasShip'], random_state=42)
 
-        train_loader = classification_data_loader(x_train, y_train, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
-        validation_loader = classification_validation_data_loader(x_val, y_val, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
+        _train_loader = classification_data_loader(x_train, y_train, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
+        _validation_loader = classification_validation_data_loader(x_val, y_val, args.dataset_path, batch_size=CLASSIFICATION_BATCH_SIZE)
+
+        train_loader = tf.data.Dataset.from_generator(
+            lambda: _train_loader,
+            output_types=(tf.float16, tf.int32),
+            output_shapes=((None, None, None, 3), (None,))
+        )
+
+        validation_loader = tf.data.Dataset.from_generator(
+            lambda: _validation_loader,
+            output_types=(tf.float16, tf.int32),
+            output_shapes=((None, None, None, 3), (None,))
+        )    
         
         # images, labels = next(train_loader)
         # print(images.shape, labels.shape)
@@ -131,4 +143,6 @@ def main():
         save_df_to_csv(df_no_ships, os.path.join(args.processed_csv_dir, "df_no_ships.csv"))
 
 if __name__ == "__main__":
-    main()
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        main()
