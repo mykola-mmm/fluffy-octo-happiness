@@ -38,7 +38,7 @@ def main():
     logger.info(f"Log level: {get_log_level()}")
     logger.info(f"Task: {args.task}")
 
-    CLASSIFICATION_BATCH_SIZE = 16
+    CLASSIFICATION_BATCH_SIZE = 4
 
     # Add your main application logic here
     if args.task == "train_classification":
@@ -74,6 +74,11 @@ def main():
         model.compile_model(learning_rate=0.001, weight_zero=weight_zero, weight_one=weight_one)
         # x, y = next(train_loader)
         # print(x)
+        # for i in range(5):
+        #     x, y = next(validation_loader)
+        #     print(x)
+        #     print(y)
+        #     print(i)
         model.train(train_loader, validation_loader, epochs=10, df_len=len(df), batch_size=CLASSIFICATION_BATCH_SIZE, save_path=args.classification_model_path)
 
     elif args.task == "test_classification":

@@ -23,7 +23,7 @@ class BinaryClassificationCNN(tf.keras.Model):
         self.dropout1 = tf.keras.layers.Dropout(dropout_rate)
         self.fc2 = tf.keras.layers.Dense(4096, activation='relu')
         self.dropout2 = tf.keras.layers.Dropout(dropout_rate)
-        self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid')
+        self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid', dtype=tf.float32)
 
     def _create_vgg19_conv_block(self, num_filters=512):
         return tf.keras.Sequential([
