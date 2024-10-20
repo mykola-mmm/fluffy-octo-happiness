@@ -15,7 +15,7 @@ def classification_data_loader(df_x, df_y, dataset_path, batch_size=32):
                 image_path = os.path.join(dataset_path, f"{row['ImageId']}")
                 image = tf.io.read_file(image_path)
                 image = tf.image.decode_jpeg(image, channels=3)
-                # image = tf.cast(image, "float16")
+                image = tf.cast(image, "float16") / 255.0
                 # image = tf.keras.applications.vgg19.preprocess_input(image)
                 images.append(image)
                 labels.append(row['HasShip'])
