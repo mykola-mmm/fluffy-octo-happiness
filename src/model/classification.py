@@ -8,7 +8,7 @@ class BinaryClassificationCNN(tf.keras.Model):
     def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.1):
         super().__init__()
         self.input_shape = input_shape
-        self.vgg19 = VGG19(weights='imagenet', include_top=False, input_shape=self.input_shape)
+        self.vgg19 = VGG19(weights='imagenet', include_top=False, input_shape=self.input_shape, pooling='max')
         
         # # Freeze VGG19 layers (Optional: could unfreeze some top layers for fine-tuning)
         # for layer in self.vgg19.layers:
