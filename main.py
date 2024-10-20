@@ -82,45 +82,45 @@ def main():
 
         logger.info(f"Class weights - Zero: {weight_zero:.4f}, One: {weight_one:.4f}")
 
-        # Use take() to get a single batch from the dataset
-        for img, labels in train_loader.take(1):
-            for i in range(len(labels)):
-                plt.figure(figsize=(8, 6))
-                img_np = img[i].numpy().astype('float32')
-                plt.imshow(img_np)
-                plt.title(f"Label: {labels[i]}")
-                plt.axis('off')
-                plt.show()
-                print(f"Label: {labels[i]}")
-                print(f"img[i].shape: {img[i].shape}")
-                print(f"img[i].dtype: {img[i].dtype}")
+        # # Use take() to get a single batch from the dataset
+        # for img, labels in train_loader.take(1):
+        #     for i in range(len(labels)):
+        #         plt.figure(figsize=(8, 6))
+        #         img_np = img[i].numpy().astype('float32')
+        #         plt.imshow(img_np)
+        #         plt.title(f"Label: {labels[i]}")
+        #         plt.axis('off')
+        #         plt.show()
+        #         print(f"Label: {labels[i]}")
+        #         print(f"img[i].shape: {img[i].shape}")
+        #         print(f"img[i].dtype: {img[i].dtype}")
         
-        # Do the same for validation_loader
-        for img, labels in validation_loader.take(1):
-            for i in range(len(labels)):
-                plt.figure(figsize=(8, 6))
-                img_np = img[i].numpy().astype('float32')
-                plt.imshow(img_np)
-                plt.title(f"Label: {labels[i]}")
-                plt.axis('off')
-                plt.show()
-                print(f"Label: {labels[i]}")
-                print(f"img[i].shape: {img[i].shape}")
-                print(f"img[i].dtype: {img[i].dtype}")
+        # # Do the same for validation_loader
+        # for img, labels in validation_loader.take(1):
+        #     for i in range(len(labels)):
+        #         plt.figure(figsize=(8, 6))
+        #         img_np = img[i].numpy().astype('float32')
+        #         plt.imshow(img_np)
+        #         plt.title(f"Label: {labels[i]}")
+        #         plt.axis('off')
+        #         plt.show()
+        #         print(f"Label: {labels[i]}")
+        #         print(f"img[i].shape: {img[i].shape}")
+        #         print(f"img[i].dtype: {img[i].dtype}")
 
 
 
-        # model.compile_model(learning_rate=0.00001, weight_zero=weight_zero, weight_one=weight_one)
-        # model.summary()
-        # model.train(train_loader,
-        #             validation_loader,
-        #             epochs=2,
-        #             train_df_len=len(x_train),
-        #             validation_df_len=len(x_val),
-        #             batch_size=CLASSIFICATION_BATCH_SIZE,
-        #             save_path=args.classification_model_path,
-        #             weight_zero=weight_zero,
-        #             weight_one=weight_one)
+        model.compile_model(learning_rate=0.0001, weight_zero=weight_zero, weight_one=weight_one)
+        model.summary()
+        model.train(train_loader,
+                    validation_loader,
+                    epochs=20,
+                    train_df_len=len(x_train),
+                    validation_df_len=len(x_val),
+                    batch_size=CLASSIFICATION_BATCH_SIZE,
+                    save_path=args.classification_model_path,
+                    weight_zero=weight_zero,
+                    weight_one=weight_one)
 
     elif args.task == "test_classification":
         logger.info("Starting test_classification task...")
