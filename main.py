@@ -89,7 +89,7 @@ def main():
         model.summary()
         model.train(train_loader,
                     validation_loader,
-                    epochs=70,
+                    epochs=5,
                     train_df_len=len(x_train),
                     validation_df_len=len(x_val),
                     batch_size=CLASSIFICATION_BATCH_SIZE,
