@@ -60,7 +60,7 @@ class BinaryClassificationCNN(tf.keras.Model):
         # metrics = ['accuracy', 'recall', 'f1_score']
         # metrics = ['accuracy']
         metrics = [
-            tf.keras.metrics.BinaryAccuracy(name='binary_accuracy_0.5', threshold=0.5, from_logits=False),
+            tf.keras.metrics.BinaryAccuracy(name='binary_accuracy_0.5', threshold=0.5),
             tf.keras.metrics.Recall(name='recall'),
         ]
 
