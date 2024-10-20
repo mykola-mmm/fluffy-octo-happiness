@@ -108,6 +108,10 @@ class BinaryClassificationCNN(tf.keras.Model):
         )
 
         # Save the best model
+        if save_path:
+            os.makedirs(save_path, exist_ok=True)
+            os.makedirs(os.path.join(save_path, "checkpoints"), exist_ok=True)
+
         best_model_path = os.path.join(save_path, "best_model.weights.h5")
         self.save_weights(best_model_path)
         self.save(os.path.join(save_path, "best_model.keras"))

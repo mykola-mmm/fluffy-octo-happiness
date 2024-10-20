@@ -114,7 +114,7 @@ def main():
             img = tf.io.read_file(image_path)
             img = tf.image.decode_image(img, channels=3)
             # img = tf.image.resize(img, (224, 224))
-            img = tf.cast(img, tf.float16) / 255.0
+            img = tf.cast(img, tf.float32) / 255.0
             img_array = tf.expand_dims(img, axis=0)
 
             prediction = model.predict(img_array)
