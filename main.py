@@ -89,7 +89,7 @@ def main():
         model.summary()
         model.train(train_loader,
                     validation_loader,
-                    epochs=25,
+                    epochs=1,
                     train_df_len=len(x_train),
                     validation_df_len=len(x_val),
                     batch_size=CLASSIFICATION_BATCH_SIZE,
@@ -120,6 +120,9 @@ def main():
             img_array = tf.expand_dims(img, axis=0)
 
             prediction = model.predict(img_array)
+            print(f"prediction: {prediction}")
+            print(f"prediction.dtype: {prediction.dtype}")
+            print(f"prediction.shape: {prediction.shape}")
             print(f"prediction.shape: {prediction.shape}")
             predicted_class = "Ship" if prediction[0][0] > 0.5 else "No Ship"
 
