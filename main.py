@@ -113,6 +113,7 @@ def main():
             # Read and preprocess the image using TensorFlow operations
             img = tf.io.read_file(image_path)
             img = tf.image.decode_image(img, channels=3)
+            img_human_readable = img.copy()
             img = tf.keras.applications.vgg19.preprocess_input(img)
             # img = tf.image.resize(img, (224, 224))
             # img = tf.cast(img, tf.float32) / 255.0
@@ -123,7 +124,7 @@ def main():
             predicted_class = "Ship" if prediction[0][0] > 0.5 else "No Ship"
 
             plt.figure(figsize=(8, 6))
-            plt.imshow(img)
+            plt.imshow(img_human_readable)
             plt.title(f"Prediction: {predicted_class} (Confidence: {prediction[0][0]:.4f})")
             plt.axis('off')
             plt.show()
