@@ -45,7 +45,7 @@ class BinaryClassificationCNN(tf.keras.Model):
         x = self.vgg19(inputs)
         # x = self.conv_block1(x)
         # x = self.conv_block2(x)
-        x = self.flatten(x)
+        # x = self.flatten(x)
         x = self.fc1(x)
         x = self.dropout1(x, training=training)
         x = self.fc2(x)
@@ -77,13 +77,13 @@ class BinaryClassificationCNN(tf.keras.Model):
             filepath=checkpoint_path,
             save_weights_only=True,
             save_best_only=True,
-            monitor='val_loss',
-            mode='min',
+            monitor='val_recall',
+            mode='max',
             verbose=1
         )
 
         reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
-            monitor='val_loss',
+            monitor='val_recall',
             factor=0.2,
             patience=5,
             min_lr=1e-6,

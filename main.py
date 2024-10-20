@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 # from src.data_loader import load_data
 # from src.model.segmentation import UNet
 from src.model.classification import BinaryClassificationCNN
-from src.data_loader import classification_data_loader, classification_validation_data_loader
+from src.data_loader import classification_data_loader
 # from src.model.bigEarthNet import model as bigEarthNetModel 
 # from src.trainer import Trainer
 from src.utils import setup_logging, get_log_level, parse_arguments
@@ -66,10 +66,7 @@ def main():
             lambda: _validation_loader,
             output_types=(tf.float16, tf.int32),
             output_shapes=((None, 768, 768, 3), (None,))
-        )    
-        
-        # images, labels = next(train_loader)
-        # print(images.shape, labels.shape)
+        )
 
         # Generate class weights because of imbalanced dataset
         total_samples = len(y_train)
@@ -85,17 +82,45 @@ def main():
 
         logger.info(f"Class weights - Zero: {weight_zero:.4f}, One: {weight_one:.4f}")
 
-        model.compile_model(learning_rate=0.0001, weight_zero=weight_zero, weight_one=weight_one)
-        model.summary()
-        model.train(train_loader,
-                    validation_loader,
-                    epochs=1,
-                    train_df_len=len(x_train),
-                    validation_df_len=len(x_val),
-                    batch_size=CLASSIFICATION_BATCH_SIZE,
-                    save_path=args.classification_model_path,
-                    weight_zero=weight_zero,
-                    weight_one=weight_one)
+        # Use take() to get a single batch from the dataset
+        for img, labels in train_loader.take(1):
+            for i in range(len(labels)):
+                plt.figure(figsize=(8, 6))
+                img_np = img[i].numpy().astype('float32')
+                plt.imshow(img_np)
+                plt.title(f"Label: {labels[i]}")
+                plt.axis('off')
+                plt.show()
+                print(f"Label: {labels[i]}")
+                print(f"img[i].shape: {img[i].shape}")
+                print(f"img[i].dtype: {img[i].dtype}")
+        
+        # Do the same for validation_loader
+        for img, labels in validation_loader.take(1):
+            for i in range(len(labels)):
+                plt.figure(figsize=(8, 6))
+                img_np = img[i].numpy().astype('float32')
+                plt.imshow(img_np)
+                plt.title(f"Label: {labels[i]}")
+                plt.axis('off')
+                plt.show()
+                print(f"Label: {labels[i]}")
+                print(f"img[i].shape: {img[i].shape}")
+                print(f"img[i].dtype: {img[i].dtype}")
+
+
+
+        # model.compile_model(learning_rate=0.00001, weight_zero=weight_zero, weight_one=weight_one)
+        # model.summary()
+        # model.train(train_loader,
+        #             validation_loader,
+        #             epochs=2,
+        #             train_df_len=len(x_train),
+        #             validation_df_len=len(x_val),
+        #             batch_size=CLASSIFICATION_BATCH_SIZE,
+        #             save_path=args.classification_model_path,
+        #             weight_zero=weight_zero,
+        #             weight_one=weight_one)
 
     elif args.task == "test_classification":
         logger.info("Starting test_classification task...")
@@ -120,9 +145,6 @@ def main():
             img_array = tf.expand_dims(img, axis=0)
 
             prediction = model.predict(img_array)
-            print(f"prediction: {prediction}")
-            print(f"prediction.dtype: {prediction.dtype}")
-            print(f"prediction.shape: {prediction.shape}")
             print(f"prediction.shape: {prediction.shape}")
             predicted_class = "Ship" if prediction[0][0] > 0.5 else "No Ship"
 
