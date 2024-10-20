@@ -9,7 +9,7 @@ def preprocess_csv(csv_file_path):
         # Read the CSV file into a DataFrame
         df = pd.read_csv(csv_file_path)
         #TODO: remove
-        df = df.head(10000)
+        df = df.head(1000)
     
         # df = df.head(10000)
         # df = df.head(50000)
