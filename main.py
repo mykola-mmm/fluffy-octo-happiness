@@ -128,7 +128,7 @@ def main():
             plt.axis('off')
             plt.show()
 
-            logger.info(f"Image: {image_file}, Prediction: {predicted_class}, Confidence: {confidence:.2f}")
+            logger.info(f"Image: {image_file}, Prediction: {predicted_class}, Prediction: {prediction:.2f}")
 
     elif args.task == "train_segmentation":
         logger.info("Starting train_segmentation task...")
