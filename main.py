@@ -113,7 +113,7 @@ def main():
             # Read and preprocess the image using TensorFlow operations
             img = tf.io.read_file(image_path)
             img = tf.image.decode_image(img, channels=3)
-            img_human_readable = img.copy()
+            img_human_readable = tf.identity(img)
             img = tf.keras.applications.vgg19.preprocess_input(img)
             # img = tf.image.resize(img, (224, 224))
             # img = tf.cast(img, tf.float32) / 255.0
