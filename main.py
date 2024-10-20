@@ -113,17 +113,17 @@ def main():
             # Read and preprocess the image using TensorFlow operations
             img = tf.io.read_file(image_path)
             img = tf.image.decode_image(img, channels=3)
+            img = tf.keras.applications.vgg19.preprocess_input(img)
             # img = tf.image.resize(img, (224, 224))
-            img = tf.cast(img, tf.float32) / 255.0
+            # img = tf.cast(img, tf.float32) / 255.0
             img_array = tf.expand_dims(img, axis=0)
 
             prediction = model.predict(img_array)
-            predicted_class = "Ship" if prediction[0][0] > 0.5 else "No Ship"
-            confidence = prediction[0][0] if predicted_class == "Ship" else 1 - prediction[0][0]
+            predicted_class = "Ship" if prediction > 0.5 else "No Ship"
 
             plt.figure(figsize=(8, 6))
             plt.imshow(img)
-            plt.title(f"Prediction: {predicted_class} (Confidence: {confidence:.2f})")
+            plt.title(f"Prediction: {predicted_class} (Confidence: {prediction:.4f})")
             plt.axis('off')
             plt.show()
 
