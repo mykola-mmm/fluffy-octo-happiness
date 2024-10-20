@@ -8,6 +8,9 @@ class BinaryClassificationCNN(tf.keras.Model):
     def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.1):
         super().__init__()
         self.input_shape = input_shape
+        self.dropout_rate = dropout_rate
+        
+    def build(self, input_shape):
         self.vgg19 = VGG19(weights='imagenet', include_top=False, input_shape=self.input_shape, pooling='max')
         
         # # Freeze VGG19 layers (Optional: could unfreeze some top layers for fine-tuning)
@@ -21,10 +24,12 @@ class BinaryClassificationCNN(tf.keras.Model):
         # Adding custom layers
         self.flatten = tf.keras.layers.Flatten()
         self.fc1 = tf.keras.layers.Dense(4096, activation='relu')
-        self.dropout1 = tf.keras.layers.Dropout(dropout_rate)
+        self.dropout1 = tf.keras.layers.Dropout(self.dropout_rate)
         self.fc2 = tf.keras.layers.Dense(4096, activation='relu')
-        self.dropout2 = tf.keras.layers.Dropout(dropout_rate)
+        self.dropout2 = tf.keras.layers.Dropout(self.dropout_rate)
         self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid', dtype=tf.float32)
+        
+        super().build(input_shape)
 
     def _create_vgg19_conv_block(self, num_filters=512):
         return tf.keras.Sequential([
