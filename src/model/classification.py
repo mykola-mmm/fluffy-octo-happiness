@@ -13,17 +13,16 @@ class BinaryClassificationCNN(tf.keras.Model):
         
     def build(self):
         # self.vgg19 = VGG19(weights='imagenet', include_top=False, input_shape=self.input_shape, pooling='max')
-        self.vgg19 = VGG19(include_top=False, input_shape=self.input_shape, pooling='max')
-        
-        # # Freeze VGG19 layers (Optional: could unfreeze some top layers for fine-tuning)
-        # for layer in self.vgg19.layers:
-        #     layer.trainable = False
+        self.vgg19 = VGG19(include_top=False, input_shape=self.input_shape)
 
         # Addding extra conv layers to reduce the number of parameters 
         self.conv_block1 = self._create_vgg19_conv_block()
         self.conv_block2 = self._create_vgg19_conv_block()
 
         # Adding custom layers
+        self.avg_pooling = tf.keras.layers.GlobalAveragePooling2D()
+        self.max_pooling = tf.keras.layers.GlobalMaxPooling2D()
+
         self.flatten = tf.keras.layers.Flatten()
         self.fc1 = tf.keras.layers.Dense(4096, activation='relu')
         self.dropout1 = tf.keras.layers.Dropout(self.dropout_rate)
@@ -41,12 +40,26 @@ class BinaryClassificationCNN(tf.keras.Model):
             tf.keras.layers.Conv2D(num_filters, (3, 3), activation='relu', padding='same'),
             tf.keras.layers.MaxPooling2D((2, 2))
         ])
+    
+    def set_vgg19_trainable(self, trainable=False):
+        """
+        Set the trainable status of the VGG19 layers.
+        
+        Args:
+            trainable (bool): If True, make VGG19 layers trainable. If False, make them non-trainable.
+        """
+        for layer in self.vgg19.layers:
+            layer.trainable = trainable
+        
+        status = "trainable" if trainable else "non-trainable"
+        print(f"VGG19 layers set to {status}.")
 
     def call(self, inputs, training=False):
         x = self.vgg19(inputs)
         # x = self.conv_block1(x)
         # x = self.conv_block2(x)
         # x = self.flatten(x)
+        x = self.max_pooling(x)
         x = self.fc1(x)
         x = self.dropout1(x, training=training)
         x = self.fc2(x)
