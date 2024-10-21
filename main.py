@@ -20,9 +20,10 @@ from src.csv_preprocessor import preprocess_csv, get_ships_df, get_no_ships_df, 
 CLASSIFICATION_INPUT_SHAPE = (768, 768, 3)
 CLASSIFICATION_DROPOUT_RATE = 0.1
 CLASSIFICATION_BATCH_SIZE = 16
-CLASSIFICATION_LR = 0.0001
-CLASSIFICATION_TL_EPOCHS = 1
-CLASSIFICATION_FT_EPOCHS = 1
+CLASSIFICATION_TL_LR = 0.0001
+CLASSIFICATION_FT_LR = 0.00001
+CLASSIFICATION_TL_EPOCHS = 10
+CLASSIFICATION_FT_EPOCHS = 10
 
 
 def main():
@@ -117,7 +118,7 @@ def main():
         model = BinaryClassificationCNN(input_shape=CLASSIFICATION_INPUT_SHAPE,
                                         dropout_rate=CLASSIFICATION_DROPOUT_RATE)
         model.set_vgg19_trainable(trainable=False)
-        model.compile_model(learning_rate=CLASSIFICATION_LR, weight_zero=weight_zero, weight_one=weight_one)
+        model.compile_model(learning_rate=CLASSIFICATION_TL_LR, weight_zero=weight_zero, weight_one=weight_one)
         model.summary()
         model.train(train_loader,
                     validation_loader,
@@ -130,7 +131,7 @@ def main():
                     weight_one=weight_one)
         
         model.set_vgg19_trainable(trainable=True)
-        model.compile_model(learning_rate=CLASSIFICATION_LR, weight_zero=weight_zero, weight_one=weight_one)
+        model.compile_model(learning_rate=CLASSIFICATION_FT_LR, weight_zero=weight_zero, weight_one=weight_one)
         model.train(train_loader,
                     validation_loader,
                     epochs=CLASSIFICATION_FT_EPOCHS,
