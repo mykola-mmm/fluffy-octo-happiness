@@ -1,0 +1,3 @@
+LOCAL ENV:
+
+python ./process_csv.py --csv_file_path ./airbus-ship-detection/train_ship_segmentations_v2.csv --output_path ./csv/processed.csv --num_datapoints 1010 --ship_noship_ratio 0.2
