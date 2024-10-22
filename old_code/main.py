@@ -115,32 +115,32 @@ def main():
         #         print(f"img[i].dtype: {img[i].dtype}")
 
 
-        model = BinaryClassificationCNN(input_shape=CLASSIFICATION_INPUT_SHAPE,
-                                        dropout_rate=CLASSIFICATION_DROPOUT_RATE)
-        model.set_vgg19_trainable(trainable=False)
-        model.compile_model(learning_rate=CLASSIFICATION_TL_LR, weight_zero=weight_zero, weight_one=weight_one)
-        model.summary()
-        model.train(train_loader,
-                    validation_loader,
-                    epochs=CLASSIFICATION_TL_EPOCHS,
-                    train_df_len=len(x_train),
-                    validation_df_len=len(x_val),
-                    batch_size=CLASSIFICATION_BATCH_SIZE,
-                    save_path=args.classification_model_path,
-                    weight_zero=weight_zero,
-                    weight_one=weight_one)
+        # model = BinaryClassificationCNN(input_shape=CLASSIFICATION_INPUT_SHAPE,
+        #                                 dropout_rate=CLASSIFICATION_DROPOUT_RATE)
+        # model.set_vgg19_trainable(trainable=False)
+        # model.compile_model(learning_rate=CLASSIFICATION_TL_LR, weight_zero=weight_zero, weight_one=weight_one)
+        # model.summary()
+        # model.train(train_loader,
+        #             validation_loader,
+        #             epochs=CLASSIFICATION_TL_EPOCHS,
+        #             train_df_len=len(x_train),
+        #             validation_df_len=len(x_val),
+        #             batch_size=CLASSIFICATION_BATCH_SIZE,
+        #             save_path=args.classification_model_path,
+        #             weight_zero=weight_zero,
+        #             weight_one=weight_one)
         
-        model.set_vgg19_trainable(trainable=True)
-        model.compile_model(learning_rate=CLASSIFICATION_FT_LR, weight_zero=weight_zero, weight_one=weight_one)
-        model.train(train_loader,
-                    validation_loader,
-                    epochs=CLASSIFICATION_FT_EPOCHS,
-                    train_df_len=len(x_train),
-                    validation_df_len=len(x_val),
-                    batch_size=CLASSIFICATION_BATCH_SIZE,
-                    save_path=args.classification_model_path,
-                    weight_zero=weight_zero,
-                    weight_one=weight_one)
+        # model.set_vgg19_trainable(trainable=True)
+        # model.compile_model(learning_rate=CLASSIFICATION_FT_LR, weight_zero=weight_zero, weight_one=weight_one)
+        # model.train(train_loader,
+        #             validation_loader,
+        #             epochs=CLASSIFICATION_FT_EPOCHS,
+        #             train_df_len=len(x_train),
+        #             validation_df_len=len(x_val),
+        #             batch_size=CLASSIFICATION_BATCH_SIZE,
+        #             save_path=args.classification_model_path,
+        #             weight_zero=weight_zero,
+        #             weight_one=weight_one)
 
 
     elif args.task == "test_classification":
