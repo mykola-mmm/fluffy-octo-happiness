@@ -87,6 +87,7 @@ class ClassificationModel(tf.keras.Model):
         )
 
     def visualize_history(self):
+        logger.info(f"Visualizing history")
         plt.plot(self.history.history['f1_score'], label='F1 Score')
         plt.plot(self.history.history['recall'], label='Recall')
         plt.plot(self.history.history['precision'], label='Precision')
@@ -96,23 +97,13 @@ class ClassificationModel(tf.keras.Model):
     def run_inference(self, data_loader):
         x, y = next(iter(data_loader))
         pred = self(x)
-        logger.debug(f"Predictions: {pred}")
+        for i in range(len(pred)):
+            plt.imshow(x[i] / 255.0)  # Normalize the image for display
+            plt.title(f"True: {y[i]}, Predicted: {pred[i].numpy()[0]:.2f}")
+            plt.axis('off')
+            plt.show()
 
-        # Display the input image, predicted result, and true result
-        plt.figure(figsize=(8, 4))
-        plt.subplot(1, 2, 1)
-        plt.imshow(x[0])  # Assuming x is a batch of images and you want to display the first one
-        plt.title("Input Image")
-        plt.axis('off')
-
-        plt.subplot(1, 2, 2)
-        plt.bar(['True', 'Predicted'], [y[0], pred[0].numpy()])
-        plt.title("Results")
-        plt.ylim(0, 1)
-        plt.ylabel("Probability")
-
-        plt.tight_layout()
-        plt.show()
+        
 
 #     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
 #         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)

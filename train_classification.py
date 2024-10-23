@@ -53,10 +53,9 @@ def main():
         pretrained=args.pretrained
     )
 
-    logger.debug(f"Model summary: {model.summary()}")
-
     model.compile_model(learning_rate = args.tl_learning_rate)
     model.set_backbone_trainable(trainable=False)
+    logger.debug(f"Model summary: {model.summary()}")
 
     # Calculate steps per epoch
     train_steps_per_epoch = len(x_train) // args.batch_size
