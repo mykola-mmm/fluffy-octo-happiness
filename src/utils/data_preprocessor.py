@@ -3,7 +3,7 @@ import logging
 import os
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def preprocess_csv(csv_file_path):
     try:
@@ -62,5 +62,5 @@ def balanced_sample(df, num_datapoints, ship_count_col='ShipCount', random_state
             sampled_dfs.append(class_df)
         else:
             sampled_dfs.append(class_df.sample(n=samples_per_class, random_state=random_state))
-        logger.debug(f"i - {i} ## ship_count - {ship_count} ## samples_per_class - {samples_per_class} ## len(sampled_dfs) - {num_datapoints - total_sampled_dfs}")
+        # logger.debug(f"i - {i} ## ship_count - {ship_count} ## samples_per_class - {samples_per_class} ## len(sampled_dfs) - {num_datapoints - total_sampled_dfs}")
     return pd.concat(sampled_dfs).sample(frac=1, random_state=random_state).reset_index(drop=True)

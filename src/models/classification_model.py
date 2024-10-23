@@ -41,8 +41,8 @@ class ClassificationModel(tf.keras.Model):
         loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
         metrics = [
                    tf.keras.metrics.Recall(),
-                #    tf.keras.metrics.Precision(),
-                #    tf.keras.metrics.F1Score(),
+                   tf.keras.metrics.Precision(),
+                   tf.keras.metrics.F1Score(),
                    ]
 
         super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
