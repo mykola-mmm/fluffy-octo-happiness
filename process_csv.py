@@ -12,13 +12,8 @@ logging.basicConfig(
     format='%(name)s - %(levelname)s - %(message)s',
     force=True
 )
-
 logger = logging.getLogger(__name__)
-
-# Uncomment the following line if you want to set debug level for this specific logger
 # logger.setLevel(logging.DEBUG)
-
-
 
 def main():
     args = process_csv_args()
