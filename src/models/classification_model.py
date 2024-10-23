@@ -1,6 +1,7 @@
 import logging
 import tensorflow as tf
 from tensorflow.keras import mixed_precision
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger(__name__)
 
@@ -58,14 +59,39 @@ class ClassificationModel(tf.keras.Model):
         logger.info(f"Backbone trainable: {self.backbone.trainable}")
 
     def train(self, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None):
+        reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
+            monitor='f1_score',
+            factor=0.2,
+            patience=5,
+            min_lr=1e-6,
+            verbose=1
+        )
+
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(
+            log_dir='./logs',
+            histogram_freq=1,
+            write_graph=True,
+            write_images=True,
+            update_freq='epoch',
+            profile_batch=2
+        )
+        
         self.history = self.fit(
             train_data_loader,
             steps_per_epoch=train_steps_per_epoch,
             epochs=epochs,
             validation_data=val_data_loader,
             validation_steps=val_steps_per_epoch,
+            callbacks=[reduce_lr_callback, tensorboard_callback]
         )
 
+    def visualize_history(self):
+        plt.plot(self.history.history['f1_score'], label='F1 Score')
+        plt.plot(self.history.history['recall'], label='Recall')
+        plt.plot(self.history.history['precision'], label='Precision')
+        plt.legend()
+        plt.show()
+            
 #     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
 #         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
 #         optimizer = mixed_precision.LossScaleOptimizer(optimizer)

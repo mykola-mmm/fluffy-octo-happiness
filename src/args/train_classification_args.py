@@ -14,5 +14,6 @@ def process_csv_args():
     parser.add_argument("--tl_learning_rate", type=float, default=0.0001, help="Learning rate")
     parser.add_argument("--ft_learning_rate", type=float, default=0.00001, help="Learning rate")
     parser.add_argument("--dropout_rate", type=float, default=0.1, help="Dropout rate")
-    parser.add_argument("--epochs", type=int, default=10, help="Epochs")
+    parser.add_argument("--tl_epochs", type=int, default=10, help="Transfer learning epochs")
+    parser.add_argument("--ft_epochs", type=int, default=10, help="Fine tuning epochs")
     return parser.parse_args()
