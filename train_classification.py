@@ -1,7 +1,7 @@
 import logging
 import pandas as pd
 import tensorflow as tf
-from src.models.efficientnet import EfficientNet
+from src.models.classification_model import ClassificationModel
 from sklearn.model_selection import train_test_split
 from src.utils.data_loader import classification_data_loader
 from src.args.train_classification_args import process_csv_args
@@ -48,18 +48,17 @@ def main():
         )
     )
 
-    model = EfficientNet()
+    model = ClassificationModel(
+        dropout_rate=args.dropout_rate,
+        pretrained=args.pretrained
+    )
     # logger.debug(f"Model summary: {model.summary()}")
     x, y = next(iter(train_loader))
     pred = model(x)[0]
-    logger.debug(f"pred: {pred.shape}")
-    logger.debug(f"x - {x[0]}")
-
-
+    logger.debug(f"pred.shape - {pred.shape}")
     logger.debug(f"pred - {pred}")
-    logger.debug(f"pred - {pred.dtype}")
-    plt.imshow(pred/255)
-    plt.show()
+    logger.debug(f"pred.dtype - {pred.dtype}")
+
 
 if __name__ == "__main__":
     logger.info("Starting train_classification")

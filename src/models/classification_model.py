@@ -4,16 +4,21 @@ from tensorflow.keras import mixed_precision
 
 logger = logging.getLogger(__name__)
 
-class EfficientNet(tf.keras.Model):
-    def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.1):
+class ClassificationModel(tf.keras.Model):
+    def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.1, pretrained=True):
         super().__init__()
         self.input_shape = input_shape
         self.dropout_rate = dropout_rate
+        self.pretrained = pretrained
         self.build()
         
     def build(self):
-        # Pretrained EfficientNetV2L model
-        self.efficientnet = tf.keras.applications.EfficientNetV2S(weights='imagenet', include_top=False, input_shape=self.input_shape, pooling='max')
+        if self.pretrained:
+            weights = 'imagenet'
+        else:
+            weights = None
+
+        self.backbone = tf.keras.applications.VGG19(weights=weights, include_top=False, input_shape=self.input_shape, pooling='max')
 
         # Binary classification head
         self.flatten = tf.keras.layers.Flatten()
@@ -22,8 +27,9 @@ class EfficientNet(tf.keras.Model):
         self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid', dtype=tf.float32)
 
     def call(self, inputs, training=False):
-        x = tf.keras.applications.efficientnet_v2.preprocess_input(inputs)
-        x = self.efficientnet(x, training=training)
+        # x = tf.keras.applications.efficientnet_v2.preprocess_input(inputs)
+        x = tf.keras.applications.vgg19.preprocess_input(inputs)
+        x = self.backbone(x, training=training)
         x = self.flatten(x)
         x = self.dense(x)
         x = self.dropout(x, training=training)
@@ -105,7 +111,7 @@ class EfficientNet(tf.keras.Model):
         inputs = tf.keras.Input(shape=self.input_shape)
         model = tf.keras.Model(inputs=inputs, outputs=self.call(inputs))
         logger.debug(f"Model summary: {model.summary()}")
-        logger.debug(f"EfficientNet summary: {self.efficientnet.summary()}")
+        logger.debug(f"ClassificationModel summary: {self.backbone.summary()}")
 
 
 #     def summary_vgg(self):
