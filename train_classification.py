@@ -52,12 +52,14 @@ def main():
         dropout_rate=args.dropout_rate,
         pretrained=args.pretrained
     )
+
+    model.compile_model(learning_rate = args.tl_learning_rate)
     # logger.debug(f"Model summary: {model.summary()}")
-    x, y = next(iter(train_loader))
-    pred = model(x)[0]
-    logger.debug(f"pred.shape - {pred.shape}")
-    logger.debug(f"pred - {pred}")
-    logger.debug(f"pred.dtype - {pred.dtype}")
+    # x, y = next(iter(train_loader))
+    # pred = model(x)[0]
+    # logger.debug(f"pred.shape - {pred.shape}")
+    # logger.debug(f"pred - {pred}")
+    # logger.debug(f"pred.dtype - {pred.dtype}")
 
 
 if __name__ == "__main__":

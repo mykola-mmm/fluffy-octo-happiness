@@ -11,6 +11,7 @@ def process_csv_args():
     # parser.add_argument("--ship_noship_ratio", type=float, default=1, help="The ratio of ship to no ship rows in the dataset")
     parser.add_argument("--rand_seed", type=int, default=None, help="Random seed")
     parser.add_argument("--pretrained", type=bool, default=True, help="Use pretrained model")
-    parser.add_argument("--learning_rate", type=float, default=0.0001, help="Learning rate")
+    parser.add_argument("--tl_learning_rate", type=float, default=0.0001, help="Learning rate")
+    parser.add_argument("--ft_learning_rate", type=float, default=0.00001, help="Learning rate")
     parser.add_argument("--dropout_rate", type=float, default=0.1, help="Dropout rate")
     return parser.parse_args()

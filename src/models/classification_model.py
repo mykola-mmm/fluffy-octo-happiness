@@ -36,6 +36,17 @@ class ClassificationModel(tf.keras.Model):
         x = self.output_layer(x)
         return x
 
+    def compile_model(self, learning_rate=0.0001):
+        optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
+        loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+        metrics = [
+                   tf.keras.metrics.Recall(),
+                   tf.keras.metrics.Precision(),
+                   tf.keras.metrics.F1Score(),
+                   ]
+
+        super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
 #     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
 #         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
 #         optimizer = mixed_precision.LossScaleOptimizer(optimizer)
