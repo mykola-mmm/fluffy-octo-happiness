@@ -55,7 +55,18 @@ def main():
 
     model.compile_model(learning_rate = args.tl_learning_rate)
     model.set_backbone_trainable(trainable=False)
-    model.train(train_loader, validation_loader, epochs=args.epochs)
+
+    # Calculate steps per epoch
+    train_steps_per_epoch = len(x_train) // args.batch_size
+    val_steps_per_epoch = len(x_val) // args.batch_size
+
+    model.train(
+        train_loader,
+        validation_loader,
+        epochs=args.epochs,
+        train_steps_per_epoch=train_steps_per_epoch,
+        val_steps_per_epoch=val_steps_per_epoch
+    )
     # model.set_backbone_trainable(trainable=True)
     # model.summary()
     # model.set_backbone_trainable(trainable=False)

@@ -57,13 +57,26 @@ class ClassificationModel(tf.keras.Model):
         self.backbone.trainable = trainable
         logger.info(f"Backbone trainable: {self.backbone.trainable}")
 
-    def train(self, data_loader, validation_data, epochs=10):
+    def train(self, data_loader, validation_data, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None):
         # Train the model
         self.history = self.fit(
             data_loader,
+            steps_per_epoch=train_steps_per_epoch,
             epochs=epochs,
             validation_data=validation_data,
+            validation_steps=val_steps_per_epoch,
         )
+#         # Train the model
+#         self.history = self.fit(
+#             data_loader,
+#             epochs=epochs,
+#             steps_per_epoch=train_steps_per_epoch,
+#             validation_data=validation_data,
+#             validation_steps=val_steps_per_epoch,
+#             callbacks=[reduce_lr_callback, tensorboard_callback],
+#             # callbacks=[checkpoint_callback, reduce_lr_callback, tensorboard_callback],
+#             class_weight={0: weight_zero, 1: weight_one}
+#         )
 
 
 
