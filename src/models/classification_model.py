@@ -47,6 +47,26 @@ class ClassificationModel(tf.keras.Model):
 
         super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
+    def summary(self):
+        inputs = tf.keras.Input(shape=self.input_shape)
+        model = tf.keras.Model(inputs=inputs, outputs=self.call(inputs))
+        logger.debug(f"Model summary: {model.summary()}")
+        logger.debug(f"ClassificationModel summary: {self.backbone.summary()}")
+
+    def set_backbone_trainable(self, trainable=False):
+        self.backbone.trainable = trainable
+        logger.info(f"Backbone trainable: {self.backbone.trainable}")
+
+    def train(self, data_loader, validation_data, epochs=10):
+        # Train the model
+        self.history = self.fit(
+            data_loader,
+            epochs=epochs,
+            validation_data=validation_data,
+        )
+
+
+
 #     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
 #         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
 #         optimizer = mixed_precision.LossScaleOptimizer(optimizer)
@@ -117,13 +137,3 @@ class ClassificationModel(tf.keras.Model):
 #         self.save_weights(best_model_path)
 #         self.save(os.path.join(save_path, "best_model.keras"))
 #         print(f"Best model saved to {best_model_path}")
-
-    def summary(self):
-        inputs = tf.keras.Input(shape=self.input_shape)
-        model = tf.keras.Model(inputs=inputs, outputs=self.call(inputs))
-        logger.debug(f"Model summary: {model.summary()}")
-        logger.debug(f"ClassificationModel summary: {self.backbone.summary()}")
-
-    def set_backbone_trainable(self, trainable=False):
-        self.backbone.trainable = trainable
-        logger.debug(f"Backbone trainable: {self.backbone.trainable}")

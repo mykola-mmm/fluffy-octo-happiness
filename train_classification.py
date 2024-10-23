@@ -54,10 +54,12 @@ def main():
     )
 
     model.compile_model(learning_rate = args.tl_learning_rate)
-    model.set_backbone_trainable(trainable=True)
-    model.summary()
     model.set_backbone_trainable(trainable=False)
-    model.summary()
+    model.train(train_loader, validation_loader, epochs=args.epochs)
+    # model.set_backbone_trainable(trainable=True)
+    # model.summary()
+    # model.set_backbone_trainable(trainable=False)
+    # model.summary()
     # logger.debug(f"Model summary: {model.summary()}")
     # x, y = next(iter(train_loader))
     # pred = model(x)[0]
