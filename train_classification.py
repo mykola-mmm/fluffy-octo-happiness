@@ -28,7 +28,7 @@ def main():
         logger.error(f"File not found: {args.csv_file_path}")
         return
 
-    x_train, x_val, y_train, y_val = train_test_split(df['ImageId'], df['HasShip'], test_size=0.2, stratify=df['HasShip'], random_state=args.rand_seed)
+    x_train, x_val, y_train, y_val = train_test_split(df['ImageId'], df['HasShip'], test_size=0.2, stratify=df['ShipCount'], random_state=args.rand_seed)
     train_data_loader = classification_data_loader(x_train, y_train, args.dataset_path, batch_size=args.batch_size, random_state=args.rand_seed)
     validation_data_loader = classification_data_loader(x_val, y_val, args.dataset_path, batch_size=args.batch_size, random_state=args.rand_seed)
 

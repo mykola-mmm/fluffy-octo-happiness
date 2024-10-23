@@ -58,33 +58,13 @@ class ClassificationModel(tf.keras.Model):
         logger.info(f"Backbone trainable: {self.backbone.trainable}")
 
     def train(self, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None):
-        # Train the model
-        try:
-            self.history = self.fit(
-                train_data_loader,
-                steps_per_epoch=train_steps_per_epoch,
-                epochs=epochs,
-                validation_data=val_data_loader,
-                validation_steps=val_steps_per_epoch,
-            )
-        except Exception as e:
-            logger.error(f"An error occurred during training: {str(e)}")
-            logger.error("Debugging information:")
-            logger.error(f"train_data_loader: {train_data_loader}")
-            logger.error(f"val_data_loader: {val_data_loader}")
-            logger.error(f"epochs: {epochs}")
-            logger.error(f"train_steps_per_epoch: {train_steps_per_epoch}")
-            logger.error(f"val_steps_per_epoch: {val_steps_per_epoch}")
-            
-            # Try to run evaluation separately to see if it's the source of the problem
-            logger.info("Attempting to run evaluation separately...")
-            try:
-                val_results = self.evaluate(val_data_loader, steps=val_steps_per_epoch)
-                logger.info(f"Evaluation results: {val_results}")
-            except Exception as eval_e:
-                logger.error(f"Error during separate evaluation: {str(eval_e)}")
-            
-            raise  # Re-raise the original exception
+        self.history = self.fit(
+            train_data_loader,
+            steps_per_epoch=train_steps_per_epoch,
+            epochs=epochs,
+            validation_data=val_data_loader,
+            validation_steps=val_steps_per_epoch,
+        )
 
 #     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
 #         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
