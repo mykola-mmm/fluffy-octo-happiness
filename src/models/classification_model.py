@@ -60,11 +60,12 @@ class ClassificationModel(tf.keras.Model):
 
     def train(self, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None):
         reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
-            monitor='f1_score',
+            monitor='val_f1_score',
             factor=0.2,
             patience=5,
             min_lr=1e-6,
-            verbose=1
+            verbose=1,
+            mode='max'
         )
 
         tensorboard_callback = tf.keras.callbacks.TensorBoard(
