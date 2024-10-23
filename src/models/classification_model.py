@@ -96,13 +96,15 @@ class ClassificationModel(tf.keras.Model):
         plt.show()
 
     def run_inference(self, data_loader):
-        x, y = next(iter(data_loader))
-        pred = self(x)
-        for i in range(len(pred)):
-            plt.imshow(x[i] / 255.0)  # Normalize the image for display
-            plt.title(f"True: {y[i]}, Predicted: {pred[i].numpy()[0]:.2f}")
-            plt.axis('off')
-            plt.show()
+        for batch_index, (x, y) in enumerate(data_loader):
+            if batch_index >= 5:
+                break
+            pred = self(x)
+            for i in range(len(pred)):
+                plt.imshow(x[i] / 255.0)  # Normalize the image for display
+                plt.title(f"True: {y[i]}, Predicted: {pred[i].numpy()[0]:.2f}")
+                plt.axis('off')
+                plt.show()
 
         
 
