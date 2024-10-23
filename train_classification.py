@@ -61,12 +61,6 @@ def main():
     plt.imshow(pred/255)
     plt.show()
 
-
-
-
-
-
-
 if __name__ == "__main__":
     logger.info("Starting train_classification")
 

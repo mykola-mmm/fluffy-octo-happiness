@@ -1,6 +1,5 @@
 import logging
 import tensorflow as tf
-from tensorflow.keras.applications import EfficientNetV2L
 from tensorflow.keras import mixed_precision
 
 logger = logging.getLogger(__name__)
@@ -14,7 +13,7 @@ class EfficientNet(tf.keras.Model):
         
     def build(self):
         # Pretrained EfficientNetV2L model
-        self.efficientnet = EfficientNetV2L(weights='imagenet', include_top=False, input_shape=self.input_shape, pooling='max')
+        self.efficientnet = tf.keras.applications.EfficientNetV2S(weights='imagenet', include_top=False, input_shape=self.input_shape, pooling='max')
 
         # Binary classification head
         self.flatten = tf.keras.layers.Flatten()
