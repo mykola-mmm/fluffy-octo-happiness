@@ -1,7 +1,9 @@
-# import os
+import logging
 import tensorflow as tf
 from tensorflow.keras.applications import EfficientNetV2L
 from tensorflow.keras import mixed_precision
+
+logger = logging.getLogger(__name__)
 
 class EfficientNet(tf.keras.Model):
     def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.1):
@@ -23,13 +25,17 @@ class EfficientNet(tf.keras.Model):
         
         # Binary classification head
         self.flatten = tf.keras.layers.Flatten()
-        self.dropout1 = tf.keras.layers.Dropout(self.dropout_rate)
-        self.fc = tf.keras.layers.Dense(512, activation='relu')
-        self.dropout2 = tf.keras.layers.Dropout(self.dropout_rate)
+        self.dense = tf.keras.layers.Dense(512, activation='relu')
+        self.dropout = tf.keras.layers.Dropout(self.dropout_rate)
         self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid', dtype=tf.float32)
 
     def call(self, inputs, training=False):
         x = tf.keras.applications.efficientnet_v2.preprocess_input(inputs)
+        x = self.efficientnet(x, training=training)
+        x = self.flatten(x)
+        x = self.dense(x)
+        x = self.dropout(x, training=training)
+        x = self.output_layer(x)
         return x
 
 #     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
@@ -103,10 +109,11 @@ class EfficientNet(tf.keras.Model):
 #         self.save(os.path.join(save_path, "best_model.keras"))
 #         print(f"Best model saved to {best_model_path}")
 
-#     def summary(self):
-#         inputs = tf.keras.Input(shape=self.input_shape)
-#         model = tf.keras.Model(inputs=inputs, outputs=self.call(inputs))
-#         model.summary()
+    def summary(self):
+        inputs = tf.keras.Input(shape=self.input_shape)
+        model = tf.keras.Model(inputs=inputs, outputs=self.call(inputs))
+        logger.info(f"Model summary: {model.summary()}")
+        logger.info(f"EfficientNet summary: {self.efficientnet.summary()}")
 
 
 #     def summary_vgg(self):

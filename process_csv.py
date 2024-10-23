@@ -9,11 +9,11 @@ from sklearn.model_selection import train_test_split
 # Configure logging for all modules
 logging.basicConfig(
     level=logging.INFO,
-    format='%(name)s - %(levelname)s - %(message)s',
+    format='%(levelname)s - %(message)s',
     force=True
 )
 logger = logging.getLogger(__name__)
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def main():
     args = process_csv_args()
