@@ -49,17 +49,17 @@ def main():
     )
 
     model = EfficientNet()
-    logger.debug(f"Model summary: {model.summary()}")
-    # x, y = next(iter(train_loader))
-    # pred = model(x[0])
-    # logger.debug(f"pred: {pred.shape}")
-    # logger.debug(f"x - {x[0]}")
+    # logger.debug(f"Model summary: {model.summary()}")
+    x, y = next(iter(train_loader))
+    pred = model(x[0])
+    logger.debug(f"pred: {pred.shape}")
+    logger.debug(f"x - {x[0]}")
 
 
-    # logger.debug(f"pred - {pred}")
-    # logger.debug(f"pred - {pred.dtype}")
-    # plt.imshow(pred/255)
-    # plt.show()
+    logger.debug(f"pred - {pred}")
+    logger.debug(f"pred - {pred.dtype}")
+    plt.imshow(pred/255)
+    plt.show()
 
 
 
