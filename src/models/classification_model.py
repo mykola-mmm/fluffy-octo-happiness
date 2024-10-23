@@ -88,6 +88,7 @@ class ClassificationModel(tf.keras.Model):
 
     def visualize_history(self):
         logger.info(f"Visualizing history")
+        logger.debug(f"History: {self.history.history}")
         plt.plot(self.history.history['f1_score'], label='F1 Score')
         plt.plot(self.history.history['recall'], label='Recall')
         plt.plot(self.history.history['precision'], label='Precision')
