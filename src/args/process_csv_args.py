@@ -1,4 +1,5 @@
 import argparse
+import pandas as pd
 
 def process_csv_args():
     parser = argparse.ArgumentParser(description="Process CSV file")
