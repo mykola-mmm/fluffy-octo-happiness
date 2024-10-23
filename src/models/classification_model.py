@@ -124,6 +124,6 @@ class ClassificationModel(tf.keras.Model):
         logger.debug(f"Model summary: {model.summary()}")
         logger.debug(f"ClassificationModel summary: {self.backbone.summary()}")
 
-
-#     def summary_vgg(self):
-#         self.vgg19.summary()
+    def set_backbone_trainable(self, trainable=False):
+        self.backbone.trainable = trainable
+        logger.debug(f"Backbone trainable: {self.backbone.trainable}")
