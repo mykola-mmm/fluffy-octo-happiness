@@ -53,6 +53,8 @@ def main():
         pretrained=args.pretrained
     )
 
+    logger.debug(f"Model summary: {model.summary()}")
+
     model.compile_model(learning_rate = args.tl_learning_rate)
     model.set_backbone_trainable(trainable=False)
 
@@ -80,6 +82,8 @@ def main():
     )
 
     model.visualize_history()
+
+    model.run_inference(validation_loader)
 
     # model.set_backbone_trainable(trainable=True)
     # model.summary()

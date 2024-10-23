@@ -91,7 +91,28 @@ class ClassificationModel(tf.keras.Model):
         plt.plot(self.history.history['precision'], label='Precision')
         plt.legend()
         plt.show()
-            
+
+    def run_inference(self, data_loader):
+        x, y = next(iter(data_loader))
+        pred = self(x)
+        logger.debug(f"Predictions: {pred}")
+
+        # Display the input image, predicted result, and true result
+        plt.figure(figsize=(8, 4))
+        plt.subplot(1, 2, 1)
+        plt.imshow(x[0])  # Assuming x is a batch of images and you want to display the first one
+        plt.title("Input Image")
+        plt.axis('off')
+
+        plt.subplot(1, 2, 2)
+        plt.bar(['True', 'Predicted'], [y[0], pred[0].numpy()])
+        plt.title("Results")
+        plt.ylim(0, 1)
+        plt.ylabel("Probability")
+
+        plt.tight_layout()
+        plt.show()
+
 #     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
 #         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
 #         optimizer = mixed_precision.LossScaleOptimizer(optimizer)
