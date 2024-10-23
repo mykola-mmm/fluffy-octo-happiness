@@ -15,14 +15,7 @@ class EfficientNet(tf.keras.Model):
     def build(self):
         # Pretrained EfficientNetV2L model
         self.efficientnet = EfficientNetV2L(weights='imagenet', include_top=False, input_shape=self.input_shape, pooling='max')
-        # # Binary classification head
-        # self.flatten = tf.keras.layers.Flatten()
-        # self.fc1 = tf.keras.layers.Dense(4096, activation='relu')
-        # self.dropout1 = tf.keras.layers.Dropout(self.dropout_rate)
-        # self.fc2 = tf.keras.layers.Dense(4096, activation='relu')
-        # self.dropout2 = tf.keras.layers.Dropout(self.dropout_rate)
-        # self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid', dtype=tf.float32)
-        
+
         # Binary classification head
         self.flatten = tf.keras.layers.Flatten()
         self.dense = tf.keras.layers.Dense(512, activation='relu')
@@ -112,8 +105,8 @@ class EfficientNet(tf.keras.Model):
     def summary(self):
         inputs = tf.keras.Input(shape=self.input_shape)
         model = tf.keras.Model(inputs=inputs, outputs=self.call(inputs))
-        logger.info(f"Model summary: {model.summary()}")
-        logger.info(f"EfficientNet summary: {self.efficientnet.summary()}")
+        logger.debug(f"Model summary: {model.summary()}")
+        logger.debug(f"EfficientNet summary: {self.efficientnet.summary()}")
 
 
 #     def summary_vgg(self):

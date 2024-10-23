@@ -32,24 +32,24 @@ def main():
     train_data_loader = classification_data_loader(x_train, y_train, args.dataset_path, batch_size=args.batch_size, random_state=args.rand_seed)
     validation_data_loader = classification_data_loader(x_val, y_val, args.dataset_path, batch_size=args.batch_size, random_state=args.rand_seed)
 
-    # x,y = next(train_data_loader)
-    # logger.debug(f"x: {x.shape}, y: {y.shape}")
-    # logger.debug(f"x dtype: {x.dtype}, y dtype: {y.dtype}")
-
     train_loader = tf.data.Dataset.from_generator(
         lambda: train_data_loader,
-        output_types=(tf.float32, tf.int32),
-        output_shapes=((None, 768, 768, 3), (None, 1))
+        output_signature=(
+            tf.TensorSpec(shape=(None, 768, 768, 3), dtype=tf.float32),
+            tf.TensorSpec(shape=(None, 1), dtype=tf.int32)
+        )
     )
 
     validation_loader = tf.data.Dataset.from_generator(
         lambda: validation_data_loader,
-        output_types=(tf.float32, tf.int32),
-        output_shapes=((None, 768, 768, 3), (None, 1))
+        output_signature=(
+            tf.TensorSpec(shape=(None, 768, 768, 3), dtype=tf.float32),
+            tf.TensorSpec(shape=(None, 1), dtype=tf.int32)
+        )
     )
 
     model = EfficientNet()
-    model.summary()
+    logger.debug(f"Model summary: {model.summary()}")
     # x, y = next(iter(train_loader))
     # pred = model(x[0])
     # logger.debug(f"pred: {pred.shape}")
@@ -69,5 +69,13 @@ def main():
 
 if __name__ == "__main__":
     logger.info("Starting train_classification")
-    main()
+
+    # Set mixed precision policy
+    policy = tf.keras.mixed_precision.Policy('mixed_float16')
+    tf.keras.mixed_precision.set_global_policy(policy)
+
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        main()
+
     logger.info("Completed train_classification")
