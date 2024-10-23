@@ -61,8 +61,8 @@ def main():
     val_steps_per_epoch = len(x_val) // args.batch_size
 
     model.train(
-        train_loader,
-        validation_loader,
+        train_data_loader=train_loader,
+        val_data_loader=validation_loader,
         epochs=args.epochs,
         train_steps_per_epoch=train_steps_per_epoch,
         val_steps_per_epoch=val_steps_per_epoch
