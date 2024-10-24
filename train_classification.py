@@ -73,6 +73,8 @@ def main():
         save_path=args.save_path
     )
 
+    logger.info(f"Transfer Learning Training Completed")
+
     model.visualize_history('tl')
 
     model.set_backbone_trainable(trainable=True)

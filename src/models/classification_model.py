@@ -8,8 +8,7 @@ import logging
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras import mixed_precision
-
-
+from src.utils.callbacks import CustomModelCheckpoint
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +77,7 @@ class ClassificationModel(tf.keras.Model):
     def train(self, stage, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None, save_path=None):
         save_path = os.path.join(save_path, stage)
         checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
-        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        checkpoint_callback = CustomModelCheckpoint(  # Changed from tf.keras.callbacks.ModelCheckpoint
             filepath=checkpoint_path,
             save_weights_only=False,
             save_best_only=True,
@@ -120,13 +119,16 @@ class ClassificationModel(tf.keras.Model):
             epochs=epochs,
             validation_data=val_data_loader,
             validation_steps=val_steps_per_epoch,
-            callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback]
+            callbacks=[reduce_lr_callback, tensorboard_callback]
+            # callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback]
         )
 
         if stage == "tl":
             self.history_tl = history
         elif stage == "ft":
             self.history_ft = history
+        
+        
 
     def visualize_history(self, stage):
         if stage == "tl":
@@ -146,8 +148,8 @@ class ClassificationModel(tf.keras.Model):
             val_recall_key = 'val_recall_1'
             val_precision_key = 'val_precision_1'
 
-        logger.info(f"Visualizing history")
-        logger.info(f"History: {self.history.history}")
+        # logger.info(f"Visualizing history")
+        # logger.info(f"History: {self.history.history}")
 
         fig, axes = plt.subplots(2, 2, figsize=(12, 10))  # Create a figure with 4 subplots
 
@@ -188,75 +190,3 @@ class ClassificationModel(tf.keras.Model):
                 plt.title(f"True: {y[i]}, Predicted: {pred[i].numpy()[0]:.2f}")
                 plt.axis('off')
                 plt.show()
-
-
-#     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
-#         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
-#         optimizer = mixed_precision.LossScaleOptimizer(optimizer)
-
-#         # metrics = ['accuracy', 'recall', 'f1_score']
-#         # metrics = ['accuracy']
-#         metrics = [
-#             tf.keras.metrics.BinaryAccuracy(name='binary_accuracy_0.5', threshold=0.5),
-#             tf.keras.metrics.Recall(name='recall'),
-#         ]
-
-
-#         self.compile(optimizer=optimizer,
-#                     #  loss=weighted_binary_crossentropy(weight_zero, weight_one),
-#                      loss = tf.keras.losses.BinaryCrossentropy(),
-#                      metrics=metrics)
-
-#     def train(self, data_loader, validation_data, epochs=10, train_df_len=None, validation_df_len=None, batch_size=32, save_path=None, weight_zero=0.5, weight_one=0.5):
-#         # Create callbacks
-#         checkpoint_path = os.path.join(save_path, "checkpoints/model_{epoch:02d}-{val_loss:.2f}.weights.h5")
-#         checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-#             filepath=checkpoint_path,
-#             save_weights_only=True,
-#             save_best_only=True,
-#             monitor='val_recall',
-#             mode='max',
-#             verbose=1
-#         )
-
-#         reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
-#             monitor='val_recall',
-#             factor=0.2,
-#             patience=5,
-#             min_lr=1e-6,
-#             verbose=1
-#         )
-
-#         tensorboard_callback = tf.keras.callbacks.TensorBoard(
-#             log_dir='./logs',
-#             histogram_freq=1,
-#             write_graph=True,
-#             write_images=True,
-#             update_freq='epoch',
-#             profile_batch=2
-#         )
-
-#         train_steps_per_epoch = train_df_len // batch_size
-#         val_steps_per_epoch = validation_df_len // batch_size
-
-#         # Train the model
-#         self.history = self.fit(
-#             data_loader,
-#             epochs=epochs,
-#             steps_per_epoch=train_steps_per_epoch,
-#             validation_data=validation_data,
-#             validation_steps=val_steps_per_epoch,
-#             callbacks=[reduce_lr_callback, tensorboard_callback],
-#             # callbacks=[checkpoint_callback, reduce_lr_callback, tensorboard_callback],
-#             class_weight={0: weight_zero, 1: weight_one}
-#         )
-
-#         # Save the best model
-#         if save_path:
-#             os.makedirs(save_path, exist_ok=True)
-#             os.makedirs(os.path.join(save_path, "checkpoints"), exist_ok=True)
-
-#         best_model_path = os.path.join(save_path, "best_model.weights.h5")
-#         self.save_weights(best_model_path)
-#         self.save(os.path.join(save_path, "best_model.keras"))
-#         print(f"Best model saved to {best_model_path}")
