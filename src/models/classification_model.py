@@ -8,7 +8,6 @@ import logging
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras import mixed_precision
-from keras_adamw import AdamW
 
 
 
@@ -51,29 +50,18 @@ class ClassificationModel(tf.keras.Model):
         return x
 
     def compile_model(self, stage, steps_per_epoch=None, learning_rate=0.0001):
-        # if stage == "tl":
-        #     learning_rate = tf.keras.optimizers.schedules.ExponentialDecay(
-        #         learning_rate,
-        #         decay_steps=steps_per_epoch,
-        #         decay_rate=0.95,
-        #         staircase=True
-        #     )
-        # elif stage == "ft":
-        #     learning_rate = learning_rate
-
-        # if stage == "tl":
-        #     # optimizer = AdamW(learning_rate=learning_rate, clipnorm=1.0)
-        #     # optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
-        # elif stage == "ft":
-        #     # optimizer = tf.keras.optimizers.AdamW(learning_rate=learning_rate, clipnorm=1.0)
+        if stage == "tl":
+            optimizer = tf.keras.optimizers.AdamW(learning_rate=learning_rate, clipnorm=1.0)
+        elif stage == "ft":
+            pass
 
         optimizer = tf.keras.optimizers.AdamW(learning_rate=learning_rate, clipnorm=1.0)
         loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
         metrics = [
-                   tf.keras.metrics.Recall(),
-                   tf.keras.metrics.Precision(),
-                   tf.keras.metrics.F1Score(threshold=0.5),
-                   ]
+            tf.keras.metrics.Recall(),
+            tf.keras.metrics.Precision(),
+            tf.keras.metrics.F1Score(threshold=0.5),
+        ]
 
         super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
@@ -89,10 +77,10 @@ class ClassificationModel(tf.keras.Model):
 
     def train(self, stage, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None, save_path=None):
         save_path = os.path.join(save_path, stage)
-        checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.weights.h5")
+        checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
         checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=checkpoint_path,
-            save_weights_only=True,
+            save_weights_only=False,
             save_best_only=True,
             monitor='val_loss',
             mode='min',
@@ -102,10 +90,10 @@ class ClassificationModel(tf.keras.Model):
         reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
             monitor='val_loss',
             factor=0.2,
-            patience=5,
+            patience=3,
             min_lr=1e-10,
             verbose=1,
-            mode='max'
+            mode='min'
         )
 
         log_dir = os.path.join(save_path, "logs", stage)
@@ -116,6 +104,14 @@ class ClassificationModel(tf.keras.Model):
             write_images=True,
             update_freq='epoch',
             profile_batch=2
+        )
+
+        early_stopping_callback = tf.keras.callbacks.EarlyStopping(
+            monitor='val_loss',
+            patience=10,  # Number of epochs with no improvement after which training will be stopped
+            verbose=1,
+            mode='min',
+            restore_best_weights=True  # Restores the model weights from the epoch with the best value of the monitored quantity
         )
         
         history = self.fit(
