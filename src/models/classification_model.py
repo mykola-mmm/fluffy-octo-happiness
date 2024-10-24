@@ -53,7 +53,7 @@ class ClassificationModel(tf.keras.Model):
         metrics = [
                    tf.keras.metrics.Recall(),
                    tf.keras.metrics.Precision(),
-                   tf.keras.metrics.F1Score(average='micro'),
+                   tf.keras.metrics.F1Score(threshold=0.5),
                    ]
 
         super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
@@ -117,8 +117,9 @@ class ClassificationModel(tf.keras.Model):
             history = self.history_tl
         elif stage == "ft":
             history = self.history_ft
+
         logger.info(f"Visualizing history")
-        logger.debug(f"History: {self.history.history}")
+        logger.info(f"History: {self.history.history}")
 
         fig, axes = plt.subplots(2, 2, figsize=(12, 10))  # Create a figure with 4 subplots
 
