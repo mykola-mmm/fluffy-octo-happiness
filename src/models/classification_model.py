@@ -47,8 +47,18 @@ class ClassificationModel(tf.keras.Model):
         x = self.output_layer(x)
         return x
 
-    def compile_model(self, learning_rate=0.0001):
-        optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
+    def compile_model(self, stage, steps_per_epoch=None, learning_rate=0.0001):
+        if stage == "tl":
+            lr = tf.keras.optimizers.schedules.ExponentialDecay(
+                learning_rate,
+                decay_steps=steps_per_epoch,
+                decay_rate=0.95,
+                staircase=True
+            )
+        elif stage == "ft":
+            lr = learning_rate
+
+        optimizer = tf.keras.optimizers.AdamW(learning_rate=lr, clipnorm=1.0)
         loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
         metrics = [
                    tf.keras.metrics.Recall(),
@@ -89,8 +99,9 @@ class ClassificationModel(tf.keras.Model):
             mode='max'
         )
 
+        log_dir = os.path.join(save_path, "logs", stage)
         tensorboard_callback = tf.keras.callbacks.TensorBoard(
-            log_dir='./logs_{stage}',
+            log_dir=log_dir,
             histogram_freq=1,
             write_graph=True,
             write_images=True,

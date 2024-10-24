@@ -53,13 +53,15 @@ def main():
         pretrained=args.pretrained
     )
 
-    model.compile_model(learning_rate = args.tl_learning_rate)
-    model.set_backbone_trainable(trainable=False)
-    logger.debug(f"Model summary: {model.summary()}")
-
     # Calculate steps per epoch
     train_steps_per_epoch = len(x_train) // args.batch_size
     val_steps_per_epoch = len(x_val) // args.batch_size
+
+    model.compile_model(stage="tl", steps_per_epoch=train_steps_per_epoch, learning_rate = args.tl_learning_rate)
+    model.set_backbone_trainable(trainable=False)
+    logger.debug(f"Model summary: {model.summary()}")
+
+
 
     model.train(
         stage="tl",
@@ -74,7 +76,7 @@ def main():
     model.visualize_history('tl')
 
     model.set_backbone_trainable(trainable=True)
-    model.compile_model(learning_rate = args.ft_learning_rate)
+    model.compile_model(stage="ft", learning_rate = args.ft_learning_rate)
 
     model.train(
         stage="ft",

@@ -27,7 +27,7 @@ KAGGLE ENV:
 %run ./process_csv.py \
     --csv_file_path /kaggle/input/airbus-ship-detection/train_ship_segmentations_v2.csv \
     --output_path /kaggle/working/processed_csv/classification_processed.csv \
-    --num_datapoints 360 \
+    --num_datapoints 10800 \
     --ship_noship_ratio 1 \
     --rand_seed 42
 
@@ -40,7 +40,7 @@ KAGGLE ENV:
     --dropout_rate 0.1 \
     --tl_learning_rate 0.0001 \
     --ft_learning_rate 0.00001 \
-    --tl_epochs 2 \
-    --ft_epochs 2 \
+    --tl_epochs 5 \
+    --ft_epochs 5 \
     --pretrained True \
     --save_path /kaggle/working/checkpoints
