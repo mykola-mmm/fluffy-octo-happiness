@@ -62,29 +62,32 @@ def main():
     val_steps_per_epoch = len(x_val) // args.batch_size
 
     model.train(
+        stage="tl",
         train_data_loader=train_loader,
         val_data_loader=validation_loader,
         epochs=args.tl_epochs,
         train_steps_per_epoch=train_steps_per_epoch,
-        val_steps_per_epoch=val_steps_per_epoch
+        val_steps_per_epoch=val_steps_per_epoch,
+        save_path=args.save_path
     )
 
-    model.visualize_history()
+    model.visualize_history('tl')
 
+    model.set_backbone_trainable(trainable=True)
+    model.compile_model(learning_rate = args.ft_learning_rate)
 
-    # model.set_backbone_trainable(trainable=True)
-    # model.compile_model(learning_rate = args.ft_learning_rate)
+    model.train(
+        stage="ft",
+        train_data_loader=train_loader,
+        val_data_loader=validation_loader,
+        epochs=args.tl_epochs,
+        train_steps_per_epoch=train_steps_per_epoch,
+        val_steps_per_epoch=val_steps_per_epoch,
+        save_path=args.save_path
+    )
 
-    # model.train(
-    #     train_data_loader=train_loader,
-    #     val_data_loader=validation_loader,
-    #     epochs=args.tl_epochs,
-    #     train_steps_per_epoch=train_steps_per_epoch,
-    #     val_steps_per_epoch=val_steps_per_epoch
-    # )
-
-    # model.visualize_history()
     model.run_inference(validation_loader)
+    model.visualize_history('ft')
 
     # model.set_backbone_trainable(trainable=True)
     # model.summary()

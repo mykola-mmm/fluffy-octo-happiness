@@ -1,3 +1,9 @@
+#TODO:
+# 1. Add adamw optimizer
+# 2. Add lr reducer for tl
+# 3. Add lr warmup for ft
+
+import os
 import logging
 import tensorflow as tf
 from tensorflow.keras import mixed_precision
@@ -23,7 +29,11 @@ class ClassificationModel(tf.keras.Model):
 
         # Binary classification head
         self.flatten = tf.keras.layers.Flatten()
-        self.dense = tf.keras.layers.Dense(512, activation='relu')
+        self.dense = tf.keras.layers.Dense(
+            512, 
+            activation='relu',
+            kernel_regularizer=tf.keras.regularizers.L1L2(l1=0.01, l2=0.01)  # Add L1 and L2 regularization
+        )
         self.dropout = tf.keras.layers.Dropout(self.dropout_rate)
         self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid', dtype=tf.float32)
 
@@ -58,18 +68,29 @@ class ClassificationModel(tf.keras.Model):
         self.backbone.trainable = trainable
         logger.info(f"Backbone trainable: {self.backbone.trainable}")
 
-    def train(self, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None):
+    def train(self, stage, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None, save_path=None):
+        save_path = os.path.join(save_path, stage)
+        checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.weights.h5")
+        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+            filepath=checkpoint_path,
+            save_weights_only=True,
+            save_best_only=True,
+            monitor='val_loss',
+            mode='min',
+            verbose=1
+        )
+        
         reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
-            monitor='val_f1_score',
-            factor=0.2,
+            monitor='val_loss',
+            factor=0.5,
             patience=5,
-            min_lr=1e-6,
+            min_lr=1e-10,
             verbose=1,
             mode='max'
         )
 
         tensorboard_callback = tf.keras.callbacks.TensorBoard(
-            log_dir='./logs',
+            log_dir='./logs_{stage}',
             histogram_freq=1,
             write_graph=True,
             write_images=True,
@@ -77,22 +98,47 @@ class ClassificationModel(tf.keras.Model):
             profile_batch=2
         )
         
-        self.history = self.fit(
+        history = self.fit(
             train_data_loader,
             steps_per_epoch=train_steps_per_epoch,
             epochs=epochs,
             validation_data=val_data_loader,
             validation_steps=val_steps_per_epoch,
-            callbacks=[reduce_lr_callback, tensorboard_callback]
+            callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback]
         )
 
-    def visualize_history(self):
+        if stage == "tl":
+            self.history_tl = history
+        elif stage == "ft":
+            self.history_ft = history
+
+    def visualize_history(self, stage):
+        if stage == "tl":
+            history = self.history_tl
+        elif stage == "ft":
+            history = self.history_ft
         logger.info(f"Visualizing history")
         logger.debug(f"History: {self.history.history}")
-        plt.plot(self.history.history['f1_score'], label='F1 Score')
-        plt.plot(self.history.history['recall'], label='Recall')
-        plt.plot(self.history.history['precision'], label='Precision')
-        plt.legend()
+
+        fig, axes = plt.subplots(1, 2, figsize=(12, 5))  # Create a figure with 2 subplots
+
+        # Plot training metrics
+        axes[0].plot(history.history['f1_score'], label='Train F1 Score')
+        axes[0].plot(history.history['recall'], label='Train Recall')
+        axes[0].plot(history.history['precision'], label='Train Precision')
+        axes[0].plot(history.history['loss'], label='Train Loss')
+        axes[0].set_title('Training Metrics')
+        axes[0].legend()
+
+        # Plot validation metrics
+        axes[1].plot(history.history['val_f1_score'], label='Val F1 Score')
+        axes[1].plot(history.history['val_recall'], label='Val Recall')
+        axes[1].plot(history.history['val_precision'], label='Val Precision')
+        axes[1].plot(history.history['val_loss'], label='Val Loss')
+        axes[1].set_title('Validation Metrics')
+        axes[1].legend()
+
+        plt.tight_layout()
         plt.show()
 
     def run_inference(self, data_loader):
@@ -106,7 +152,6 @@ class ClassificationModel(tf.keras.Model):
                 plt.axis('off')
                 plt.show()
 
-        
 
 #     def compile_model(self, learning_rate=0.001, weight_zero=0.5, weight_one=0.5):
 #         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)

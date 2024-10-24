@@ -16,4 +16,5 @@ def process_csv_args():
     parser.add_argument("--dropout_rate", type=float, default=0.1, help="Dropout rate")
     parser.add_argument("--tl_epochs", type=int, default=10, help="Transfer learning epochs")
     parser.add_argument("--ft_epochs", type=int, default=10, help="Fine tuning epochs")
+    parser.add_argument("--save_path", type=str, default="./checkpoints", help="Path to save checkpoints")
     return parser.parse_args()

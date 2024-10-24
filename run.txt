@@ -1,4 +1,46 @@
 LOCAL ENV:
 
-python ./process_csv.py --csv_file_path ./airbus-ship-detection/train_ship_segmentations_v2.csv --output_path ./processed_csv/classification_processed.csv --num_datapoints 1010 --ship_noship_ratio 0.2 --rand_seed 42r_learning_rate 0.00001
-python ./train_classification.py --csv_file_path ./processed_csv/classification_processed.csv --dataset_path ./airbus-ship-detection/train_v2 --batch_size 32 --rand_seed 42 --pretrained True --dropout_rate 0.1 --tl_learning_rate 0.0001 --ft_learning_rate 0.00001  --tl_epochs 10 --ft_epochs 10 --pretrained True
+python ./process_csv.py \
+    --csv_file_path ./airbus-ship-detection/train_ship_segmentations_v2.csv \
+    --output_path ./processed_csv/classification_processed.csv \
+    --num_datapoints 1010 \
+    --ship_noship_ratio 0.2 \
+    --rand_seed 42
+
+python ./train_classification.py \
+    --csv_file_path ./processed_csv/classification_processed.csv \
+    --dataset_path ./airbus-ship-detection/train_v2 \
+    --batch_size 32 \
+    --rand_seed 42 \
+    --pretrained True \
+    --dropout_rate 0.1 \
+    --tl_learning_rate 0.0001 \
+    --ft_learning_rate 0.00001 \
+    --tl_epochs 10 \
+    --ft_epochs 10 \
+    --pretrained True \
+    --save_path ./checkpoints
+
+
+KAGGLE ENV:
+
+%run ./process_csv.py \
+    --csv_file_path /kaggle/input/airbus-ship-detection/train_ship_segmentations_v2.csv \
+    --output_path /kaggle/working/processed_csv/classification_processed.csv \
+    --num_datapoints 360 \
+    --ship_noship_ratio 1 \
+    --rand_seed 42
+
+%run ./train_classification.py \
+    --csv_file_path /kaggle/working/processed_csv/classification_processed.csv \
+    --dataset_path /kaggle/input/airbus-ship-detection/train_v2 \
+    --batch_size 32 \
+    --rand_seed 42 \
+    --pretrained True \
+    --dropout_rate 0.1 \
+    --tl_learning_rate 0.0001 \
+    --ft_learning_rate 0.00001 \
+    --tl_epochs 2 \
+    --ft_epochs 2 \
+    --pretrained True \
+    --save_path /kaggle/working/checkpoints
