@@ -43,4 +43,10 @@ KAGGLE ENV:
     --tl_epochs 5 \
     --ft_epochs 5 \
     --pretrained True \
-    --save_path /kaggle/working/checkpoints
+    --save_path /kaggle/working/checkpoints \
+    --decay_rate 0.9 \
+    --dropout_rate 0.2 \
+    --l1 0.01 \
+    --l2 0.01 \
+    --ft_warmup_epochs 5 \
+    --ft_min_learning_rate 0.000000001

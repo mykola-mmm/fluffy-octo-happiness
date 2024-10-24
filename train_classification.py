@@ -57,7 +57,7 @@ def main():
     train_steps_per_epoch = len(x_train) // args.batch_size
     val_steps_per_epoch = len(x_val) // args.batch_size
 
-    model.compile_model(stage="tl", steps_per_epoch=train_steps_per_epoch, learning_rate = args.tl_learning_rate)
+    model.compile_model(stage="tl", steps_per_epoch=train_steps_per_epoch, learning_rate = args.tl_learning_rate, decay_rate=args.decay_rate)
     model.set_backbone_trainable(trainable=False)
     logger.debug(f"Model summary: {model.summary()}")
 
@@ -78,7 +78,7 @@ def main():
     model.visualize_history('tl')
 
     model.set_backbone_trainable(trainable=True)
-    model.compile_model(stage="ft", learning_rate = args.ft_learning_rate)
+    model.compile_model(stage="ft", learning_rate = args.ft_learning_rate, steps_per_epoch=train_steps_per_epoch, warmup_epochs=args.ft_warmup_epochs, min_learning_rate=args.ft_min_learning_rate)
 
     model.train(
         stage="ft",
