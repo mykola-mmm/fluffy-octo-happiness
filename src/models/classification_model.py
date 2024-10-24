@@ -48,17 +48,17 @@ class ClassificationModel(tf.keras.Model):
         return x
 
     def compile_model(self, stage, steps_per_epoch=None, learning_rate=0.0001):
-        if stage == "tl":
-            lr = tf.keras.optimizers.schedules.ExponentialDecay(
-                learning_rate,
-                decay_steps=steps_per_epoch,
-                decay_rate=0.95,
-                staircase=True
-            )
-        elif stage == "ft":
-            lr = learning_rate
+        # if stage == "tl":
+        #     learning_rate = tf.keras.optimizers.schedules.ExponentialDecay(
+        #         learning_rate,
+        #         decay_steps=steps_per_epoch,
+        #         decay_rate=0.95,
+        #         staircase=True
+        #     )
+        # elif stage == "ft":
+        #     learning_rate = learning_rate
 
-        optimizer = tf.keras.optimizers.AdamW(learning_rate=lr, clipnorm=1.0)
+        optimizer = tf.keras.optimizers.AdamW(learning_rate=learning_rate, clipnorm=1.0)
         loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
         metrics = [
                    tf.keras.metrics.Recall(),
@@ -92,7 +92,7 @@ class ClassificationModel(tf.keras.Model):
         
         reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
             monitor='val_loss',
-            factor=0.5,
+            factor=0.2,
             patience=5,
             min_lr=1e-10,
             verbose=1,
