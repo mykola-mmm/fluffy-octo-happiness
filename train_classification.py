@@ -86,8 +86,8 @@ def main():
         save_path=args.save_path
     )
 
-    model.run_inference(validation_loader)
     model.visualize_history('ft')
+    model.run_inference(validation_loader)
 
     # model.set_backbone_trainable(trainable=True)
     # model.summary()

@@ -53,7 +53,7 @@ class ClassificationModel(tf.keras.Model):
         metrics = [
                    tf.keras.metrics.Recall(),
                    tf.keras.metrics.Precision(),
-                   tf.keras.metrics.F1Score(),
+                   tf.keras.metrics.F1Score(average='micro'),
                    ]
 
         super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
@@ -120,23 +120,31 @@ class ClassificationModel(tf.keras.Model):
         logger.info(f"Visualizing history")
         logger.debug(f"History: {self.history.history}")
 
-        fig, axes = plt.subplots(1, 2, figsize=(12, 5))  # Create a figure with 2 subplots
+        fig, axes = plt.subplots(2, 2, figsize=(12, 10))  # Create a figure with 4 subplots
 
         # Plot training metrics
-        axes[0].plot(history.history['f1_score'], label='Train F1 Score')
-        axes[0].plot(history.history['recall'], label='Train Recall')
-        axes[0].plot(history.history['precision'], label='Train Precision')
-        axes[0].plot(history.history['loss'], label='Train Loss')
-        axes[0].set_title('Training Metrics')
-        axes[0].legend()
+        axes[0, 0].plot(history.history['f1_score'], label='Train F1 Score')
+        axes[0, 0].plot(history.history['recall'], label='Train Recall')
+        axes[0, 0].plot(history.history['precision'], label='Train Precision')
+        axes[0, 0].set_title('Training Metrics')
+        axes[0, 0].legend()
 
         # Plot validation metrics
-        axes[1].plot(history.history['val_f1_score'], label='Val F1 Score')
-        axes[1].plot(history.history['val_recall'], label='Val Recall')
-        axes[1].plot(history.history['val_precision'], label='Val Precision')
-        axes[1].plot(history.history['val_loss'], label='Val Loss')
-        axes[1].set_title('Validation Metrics')
-        axes[1].legend()
+        axes[0, 1].plot(history.history['val_f1_score'], label='Val F1 Score')
+        axes[0, 1].plot(history.history['val_recall'], label='Val Recall')
+        axes[0, 1].plot(history.history['val_precision'], label='Val Precision')
+        axes[0, 1].set_title('Validation Metrics')
+        axes[0, 1].legend()
+
+        # Plot training loss
+        axes[1, 0].plot(history.history['loss'], label='Train Loss')
+        axes[1, 0].set_title('Training Loss')
+        axes[1, 0].legend()
+
+        # Plot validation loss
+        axes[1, 1].plot(history.history['val_loss'], label='Val Loss')
+        axes[1, 1].set_title('Validation Loss')
+        axes[1, 1].legend()
 
         plt.tight_layout()
         plt.show()
