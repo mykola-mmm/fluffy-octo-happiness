@@ -115,8 +115,20 @@ class ClassificationModel(tf.keras.Model):
     def visualize_history(self, stage):
         if stage == "tl":
             history = self.history_tl
+            f1score_key = 'f1_score'
+            recall_key = 'recall'
+            precision_key = 'precision'
+            val_f1score_key = 'val_f1_score'
+            val_recall_key = 'val_recall'
+            val_precision_key = 'val_precision'
         elif stage == "ft":
             history = self.history_ft
+            f1score_key = 'f1_score'
+            recall_key = 'recall_1'
+            precision_key = 'precision_1'
+            val_f1score_key = 'val_f1_score'
+            val_recall_key = 'val_recall_1'
+            val_precision_key = 'val_precision_1'
 
         logger.info(f"Visualizing history")
         logger.info(f"History: {self.history.history}")
@@ -124,16 +136,16 @@ class ClassificationModel(tf.keras.Model):
         fig, axes = plt.subplots(2, 2, figsize=(12, 10))  # Create a figure with 4 subplots
 
         # Plot training metrics
-        axes[0, 0].plot(history.history['f1_score'], label='Train F1 Score')
-        axes[0, 0].plot(history.history['recall'], label='Train Recall')
-        axes[0, 0].plot(history.history['precision'], label='Train Precision')
+        axes[0, 0].plot(history.history[f1score_key], label='Train F1 Score')
+        axes[0, 0].plot(history.history[recall_key], label='Train Recall')
+        axes[0, 0].plot(history.history[precision_key], label='Train Precision')
         axes[0, 0].set_title('Training Metrics')
         axes[0, 0].legend()
 
         # Plot validation metrics
-        axes[0, 1].plot(history.history['val_f1_score'], label='Val F1 Score')
-        axes[0, 1].plot(history.history['val_recall'], label='Val Recall')
-        axes[0, 1].plot(history.history['val_precision'], label='Val Precision')
+        axes[0, 1].plot(history.history[val_f1score_key], label='Val F1 Score')
+        axes[0, 1].plot(history.history[val_recall_key], label='Val Recall')
+        axes[0, 1].plot(history.history[val_precision_key], label='Val Precision')
         axes[0, 1].set_title('Validation Metrics')
         axes[0, 1].legend()
 
