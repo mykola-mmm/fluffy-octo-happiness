@@ -6,8 +6,11 @@
 import os
 import logging
 import tensorflow as tf
-from tensorflow.keras import mixed_precision
 import matplotlib.pyplot as plt
+from tensorflow.keras import mixed_precision
+from keras_adamw import AdamW
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +60,12 @@ class ClassificationModel(tf.keras.Model):
         #     )
         # elif stage == "ft":
         #     learning_rate = learning_rate
+
+        # if stage == "tl":
+        #     # optimizer = AdamW(learning_rate=learning_rate, clipnorm=1.0)
+        #     # optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)
+        # elif stage == "ft":
+        #     # optimizer = tf.keras.optimizers.AdamW(learning_rate=learning_rate, clipnorm=1.0)
 
         optimizer = tf.keras.optimizers.AdamW(learning_rate=learning_rate, clipnorm=1.0)
         loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
