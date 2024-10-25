@@ -84,7 +84,7 @@ def main():
         stage="ft",
         train_data_loader=train_loader,
         val_data_loader=validation_loader,
-        epochs=args.tl_epochs,
+        epochs=args.ft_epochs,
         train_steps_per_epoch=train_steps_per_epoch,
         val_steps_per_epoch=val_steps_per_epoch,
         save_path=args.save_path

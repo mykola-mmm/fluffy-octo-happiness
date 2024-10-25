@@ -9,6 +9,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras import mixed_precision
 from src.utils.callbacks import CustomModelCheckpoint
+from src.utils.warmup_decay_schedule import WarmupDecaySchedule
 
 logger = logging.getLogger(__name__)
 
@@ -64,33 +65,54 @@ class ClassificationModel(tf.keras.Model):
             )
             optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
         elif stage == "ft":
-            # Warmup settings
-            warmup_epochs = warmup_epochs
             warmup_steps = steps_per_epoch * warmup_epochs
             
-            # Create warmup schedule that linearly increases from 0 to target learning rate
-            warmup_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
-                initial_learning_rate=min_learning_rate,
-                decay_steps=warmup_steps,
-                end_learning_rate=learning_rate,
-                power=1.0  # Linear warmup
-            )
-            
-            # Create main learning rate schedule (after warmup)
-            main_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+            # Create the main decay schedule
+            decay_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
                 initial_learning_rate=learning_rate,
                 decay_steps=steps_per_epoch,
                 decay_rate=decay_rate,
                 staircase=True
             )
             
-            # Combine warmup and main schedules
-            lr_schedule = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
-                boundaries=[warmup_steps],
-                values=[warmup_schedule, main_schedule]
+            # Create combined warmup and decay schedule
+            lr_schedule = WarmupDecaySchedule(
+                initial_learning_rate=learning_rate,
+                decay_schedule_fn=decay_schedule,
+                warmup_steps=warmup_steps,
+                min_learning_rate=min_learning_rate
             )
             
             optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
+
+        # elif stage == "ft":
+        #     # Warmup settings
+        #     warmup_epochs = warmup_epochs
+        #     warmup_steps = steps_per_epoch * warmup_epochs
+            
+        #     # Create warmup schedule that linearly increases from 0 to target learning rate
+        #     warmup_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
+        #         initial_learning_rate=min_learning_rate,
+        #         decay_steps=warmup_steps,
+        #         end_learning_rate=learning_rate,
+        #         power=1.0  # Linear warmup
+        #     )
+            
+        #     # Create main learning rate schedule (after warmup)
+        #     main_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+        #         initial_learning_rate=learning_rate,
+        #         decay_steps=steps_per_epoch,
+        #         decay_rate=decay_rate,
+        #         staircase=True
+        #     )
+            
+        #     # Combine warmup and main schedules
+        #     lr_schedule = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
+        #         boundaries=[warmup_steps],
+        #         values=[warmup_schedule, main_schedule]
+        #     )
+            
+        #     optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
 
         # optimizer = tf.keras.optimizers.AdamW(learning_rate=learning_rate, clipnorm=1.0)
         loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
@@ -157,8 +179,8 @@ class ClassificationModel(tf.keras.Model):
             epochs=epochs,
             validation_data=val_data_loader,
             validation_steps=val_steps_per_epoch,
-            # callbacks=[reduce_lr_callback, tensorboard_callback]
-            callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback]
+            callbacks=[reduce_lr_callback, tensorboard_callback]
+            # callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback]
         )
 
         if stage == "tl":
