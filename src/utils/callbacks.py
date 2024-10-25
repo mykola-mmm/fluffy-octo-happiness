@@ -10,7 +10,10 @@ class CustomModelCheckpoint(tf.keras.callbacks.ModelCheckpoint):
     def _save_model(self, epoch, batch, logs):
         # Delete previous model files if they exist
         if self.best_filepath:
-            os.remove(self.best_filepath)
+            try:
+                os.remove(self.best_filepath)
+            except OSError as e:
+                print(f"Error deleting file {self.best_filepath}: {e}")
             # model_dir = os.path.dirname(self.best_filepath)
             # # Get the base filename without epoch and metrics
             # base_filename = os.path.basename(self.best_filepath).split('model_')[0]

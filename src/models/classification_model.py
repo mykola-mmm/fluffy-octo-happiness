@@ -36,7 +36,8 @@ class ClassificationModel(tf.keras.Model):
         self.dense = tf.keras.layers.Dense(
             512, 
             activation='relu',
-            kernel_regularizer=tf.keras.regularizers.L1L2(l1=self.l1, l2=self.l2)  # Add L1 and L2 regularization
+            kernel_regularizer=tf.keras.regularizers.l1(self.l1),
+            # kernel_regularizer=tf.keras.regularizers.L1L2(l1=self.l1, l2=self.l2)  # Add L1 and L2 regularization
         )
         self.dropout = tf.keras.layers.Dropout(self.dropout_rate)
         self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid', dtype=tf.float32)
@@ -242,7 +243,7 @@ class ClassificationModel(tf.keras.Model):
 
     def run_inference(self, data_loader):
         for batch_index, (x, y) in enumerate(data_loader):
-            if batch_index >= 5:
+            if batch_index >= 10:
                 break
             pred = self(x)
             for i in range(len(pred)):

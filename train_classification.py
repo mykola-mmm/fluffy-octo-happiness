@@ -57,11 +57,10 @@ def main():
     train_steps_per_epoch = len(x_train) // args.batch_size
     val_steps_per_epoch = len(x_val) // args.batch_size
 
-    model.compile_model(stage="tl", steps_per_epoch=train_steps_per_epoch, learning_rate = args.tl_learning_rate, decay_rate=args.decay_rate)
+    # Transfer Learning phase
     model.set_backbone_trainable(trainable=False)
+    model.compile_model(stage="tl", steps_per_epoch=train_steps_per_epoch, learning_rate = args.tl_learning_rate, decay_rate=args.decay_rate)
     logger.debug(f"Model summary: {model.summary()}")
-
-
 
     model.train(
         stage="tl",
@@ -78,7 +77,8 @@ def main():
 
     model.visualize_history('tl')
 
-    model.set_backbone_trainable(trainable=True)
+    # Fine-tuning phase
+    model.set_backbone_trainable(trainable=True)  # Unfreeze the backbone
     model.compile_model(stage="ft", learning_rate = args.ft_learning_rate, steps_per_epoch=train_steps_per_epoch, warmup_epochs=args.ft_warmup_epochs, min_learning_rate=args.ft_min_learning_rate)
 
     model.train(
