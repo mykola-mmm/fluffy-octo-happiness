@@ -36,7 +36,7 @@ class ClassificationModel(tf.keras.Model):
         self.dense = tf.keras.layers.Dense(
             512, 
             activation='relu',
-            kernel_regularizer=tf.keras.regularizers.l1(self.l1),
+            kernel_regularizer=tf.keras.regularizers.L1(self.l1),
             # kernel_regularizer=tf.keras.regularizers.L1L2(l1=self.l1, l2=self.l2)  # Add L1 and L2 regularization
         )
         self.dropout = tf.keras.layers.Dropout(self.dropout_rate)
