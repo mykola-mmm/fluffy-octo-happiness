@@ -3,8 +3,10 @@ import logging
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras import mixed_precision
-from src.utils.callbacks import CustomModelCheckpoint
-from src.utils.warmup_decay_schedule import WarmupDecaySchedule
+# from src.utils.callbacks import CustomModelCheckpoint
+# from src.utils.warmup_decay_schedule import WarmupDecaySchedule
+from src.utils.dice_loss import DiceLoss
+from src.utils.iou import IoU
 
 logger = logging.getLogger(__name__)
 
@@ -70,12 +72,35 @@ class SegmentationModel(tf.keras.Model):
 
     def call(self, inputs, training=False):
         # Encoder path (VGG16)
-        x = self.backbone.input
-        block1_out = self.block1_conv2
-        block2_out = self.block2_conv2
-        block3_out = self.block3_conv3
-        block4_out = self.block4_conv3
-        encoder_out = self.block5_conv3
+        x = tf.keras.applications.vgg16.preprocess_input(inputs)  # Changed to VGG16 to match backbone
+        
+        # Get the actual tensor values through sequential processing
+        x = self.backbone.get_layer('block1_conv1')(x)
+        x = self.backbone.get_layer('block1_conv2')(x)
+        block1_out = x
+        x = self.backbone.get_layer('block1_pool')(x)
+        
+        x = self.backbone.get_layer('block2_conv1')(x)
+        x = self.backbone.get_layer('block2_conv2')(x)
+        block2_out = x
+        x = self.backbone.get_layer('block2_pool')(x)
+        
+        x = self.backbone.get_layer('block3_conv1')(x)
+        x = self.backbone.get_layer('block3_conv2')(x)
+        x = self.backbone.get_layer('block3_conv3')(x)
+        block3_out = x
+        x = self.backbone.get_layer('block3_pool')(x)
+        
+        x = self.backbone.get_layer('block4_conv1')(x)
+        x = self.backbone.get_layer('block4_conv2')(x)
+        x = self.backbone.get_layer('block4_conv3')(x)
+        block4_out = x
+        x = self.backbone.get_layer('block4_pool')(x)
+        
+        x = self.backbone.get_layer('block5_conv1')(x)
+        x = self.backbone.get_layer('block5_conv2')(x)
+        x = self.backbone.get_layer('block5_conv3')(x)
+        encoder_out = x
 
         # Decoder path with skip connections
         x = self.up_conv4(encoder_out)
@@ -123,48 +148,39 @@ class SegmentationModel(tf.keras.Model):
         plt.imshow(img)
         plt.axis('off')
         plt.show()
-    # def compile_model(self, stage, steps_per_epoch=None, learning_rate=0.0001, decay_rate=0.9, warmup_epochs=5, min_learning_rate=0.000000001):
-    #     if stage == "tl":
-    #         initial_learning_rate = learning_rate
-    #         decay_steps = steps_per_epoch  # Decay over 5 epochs
-    #         decay_rate = decay_rate  # Reduces LR by 10% each decay_steps
-            
-    #         lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-    #             initial_learning_rate=initial_learning_rate,
-    #             decay_steps=decay_steps,
-    #             decay_rate=decay_rate,
-    #             staircase=True  # True makes the decay stepwise, False makes it smooth
-    #         )
-    #         optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
-    #     elif stage == "ft":
-    #         warmup_steps = steps_per_epoch * warmup_epochs
-            
-    #         # Create the main decay schedule
-    #         decay_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-    #             initial_learning_rate=learning_rate,
-    #             decay_steps=steps_per_epoch,
-    #             decay_rate=decay_rate,
-    #             staircase=True
-    #         )
-            
-    #         # Create combined warmup and decay schedule
-    #         lr_schedule = WarmupDecaySchedule(
-    #             initial_learning_rate=learning_rate,
-    #             decay_schedule_fn=decay_schedule,
-    #             warmup_steps=warmup_steps,
-    #             min_learning_rate=min_learning_rate
-    #         )
-    #         optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
 
+    def compile_model(self, steps_per_epoch=None, learning_rate=0.0001, decay_rate=0.9):
+        initial_learning_rate = learning_rate
+        decay_steps = steps_per_epoch
+        decay_rate = decay_rate
+        
+        lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+            initial_learning_rate=initial_learning_rate,
+            decay_steps=decay_steps,
+            decay_rate=decay_rate,
+            staircase=True
+        )
+        optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
 
-    #     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-    #     metrics = [
-    #         tf.keras.metrics.Recall(),
-    #         tf.keras.metrics.Precision(),
-    #         tf.keras.metrics.F1Score(threshold=0.5),
-    #     ]
+        # Create loss functions
+        bce_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+        dice_loss = DiceLoss()
 
-    #     super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
+        # Combined loss function
+        def combined_loss(y_true, y_pred):
+            return bce_loss(y_true, y_pred) + dice_loss(y_true, y_pred)
+
+        metrics = [
+            IoU(threshold=0.5, name='iou'),
+            DiceLoss(smooth=1e-6, name='dice_loss'),
+            tf.keras.metrics.Recall(),
+            tf.keras.metrics.Precision(),
+
+            # tf.keras.metrics.F1Score(threshold=0.5),
+            dice_loss
+        ]
+
+        super().compile(optimizer=optimizer, loss=combined_loss, metrics=metrics)
 
     # def summary(self):
     #     inputs = tf.keras.Input(shape=self.input_shape)
@@ -172,67 +188,61 @@ class SegmentationModel(tf.keras.Model):
     #     logger.debug(f"Model summary: {model.summary()}")
     #     logger.debug(f"ClassificationModel summary: {self.backbone.summary()}")
 
-    # def set_backbone_trainable(self, trainable=False):
-    #     self.backbone.trainable = trainable
-    #     logger.info(f"Backbone trainable: {self.backbone.trainable}")
+    def set_backbone_trainable(self, trainable=False):
+        self.backbone.trainable = trainable
+        logger.info(f"Backbone trainable: {self.backbone.trainable}")
 
-    # def train(self, stage, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None, save_path=None, logs_path=None, early_stopping_patience=None):
-    #     save_path = os.path.join(save_path, stage)
-    #     os.makedirs(save_path, exist_ok=True)  # Add this line
-    #     logger.info(f"Save directory exists: {os.path.exists(save_path)}")
-    #     checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
-    #     logger.info(f"Models will be saved to: {checkpoint_path}")  # Add this line
-    #     checkpoint_callback = CustomModelCheckpoint(  # Changed from tf.keras.callbacks.ModelCheckpoint
-    #         filepath=checkpoint_path,
-    #         save_weights_only=False,
-    #         save_best_only=True,
-    #         monitor='val_loss',
-    #         mode='min',
-    #         verbose=1
-    #     )
+    def train(self, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None, save_path=None, logs_path=None, early_stopping_patience=None):
+        save_path = os.path.join(save_path)
+        os.makedirs(save_path, exist_ok=True)  # Add this line
+        logger.info(f"Models will be saved to: {save_path}")  # Add this line
+        checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
+        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+            filepath=checkpoint_path,
+            save_weights_only=False,
+            save_best_only=True,
+            monitor='val_loss',
+            mode='min',
+            verbose=1
+        )
         
-    #     # reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
-    #     #     monitor='val_loss',
-    #     #     factor=0.2,
-    #     #     patience=3,
-    #     #     min_lr=1e-10,
-    #     #     verbose=1,
-    #     #     mode='min'
-    #     # )
+        # reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
+        #     monitor='val_loss',
+        #     factor=0.2,
+        #     patience=3,
+        #     min_lr=1e-10,
+        #     verbose=1,
+        #     mode='min'
+        # )
 
-    #     log_dir = os.path.join(logs_path, stage)
-    #     tensorboard_callback = tf.keras.callbacks.TensorBoard(
-    #         log_dir=log_dir,
-    #         histogram_freq=1,
-    #         write_graph=True,
-    #         write_images=True,
-    #         update_freq='epoch',
-    #         profile_batch=2
-    #     )
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(
+            log_dir=logs_path,
+            histogram_freq=1,
+            write_graph=True,
+            write_images=True,
+            update_freq='epoch',
+            profile_batch=2
+        )
 
-    #     early_stopping_callback = tf.keras.callbacks.EarlyStopping(
-    #         monitor='val_loss',
-    #         patience=early_stopping_patience,  # Number of epochs with no improvement after which training will be stopped
-    #         verbose=1,
-    #         mode='min',
-    #         restore_best_weights=True  # Restores the model weights from the epoch with the best value of the monitored quantity
-    #     )
+        early_stopping_callback = tf.keras.callbacks.EarlyStopping(
+            monitor='val_loss',
+            patience=early_stopping_patience,  # Number of epochs with no improvement after which training will be stopped
+            verbose=1,
+            mode='min',
+            restore_best_weights=True  # Restores the model weights from the epoch with the best value of the monitored quantity
+        )
         
-    #     history = self.fit(
-    #         train_data_loader,
-    #         steps_per_epoch=train_steps_per_epoch,
-    #         epochs=epochs,
-    #         validation_data=val_data_loader,
-    #         validation_steps=val_steps_per_epoch,
-    #         # callbacks=[reduce_lr_callback, tensorboard_callback]
-    #         # callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback, early_stopping_callback]
-    #         callbacks=[checkpoint_callback, tensorboard_callback, early_stopping_callback]
-    #     )
+        self.history = self.fit(
+            train_data_loader,
+            steps_per_epoch=train_steps_per_epoch,
+            epochs=epochs,
+            validation_data=val_data_loader,
+            validation_steps=val_steps_per_epoch,
+            # callbacks=[reduce_lr_callback, tensorboard_callback]
+            # callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback, early_stopping_callback]
+            callbacks=[checkpoint_callback, tensorboard_callback, early_stopping_callback]
+        )
 
-    #     if stage == "tl":
-    #         self.history_tl = history
-    #     elif stage == "ft":
-    #         self.history_ft = history
 
     # def visualize_history(self, stage):
     #     if stage == "tl":

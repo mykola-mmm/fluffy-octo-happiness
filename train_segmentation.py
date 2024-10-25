@@ -49,6 +49,53 @@ def main():
         )
     )
 
+    # # Visualize first batch
+    # for images, masks in train_loader.take(1):
+    #     # Take the first batch and convert to numpy for visualization
+    #     logger.debug(f"Images shape: {images.shape}, Masks shape: {masks.shape}")
+    #     images = images.numpy()
+    #     masks = masks.numpy()
+        
+    #     for i in range(images.shape[0]):
+    #         # Create a figure with 2 rows for each image
+    #         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 12))
+            
+    #         # Display original image
+    #         ax1.imshow(images[i]/255)
+    #         ax1.set_title(f'Image {i+1}')
+    #         ax1.axis('off')
+            
+    #         # Display mask
+    #         ax2.imshow(masks[i, :, :, 0], cmap='gray')
+    #         ax2.set_title(f'Mask {i+1}')
+    #         ax2.axis('off')
+            
+    #         plt.tight_layout()
+    #         plt.show()
+
+    train_steps_per_epoch = len(x_train) // args.batch_size
+    val_steps_per_epoch = len(x_val) // args.batch_size
+
+    model = SegmentationModel(
+        dropout_rate=args.dropout_rate,
+        pretrained=args.pretrained
+    )
+    # model.summary()
+    # model.visualize_model()
+    model.set_backbone_trainable(trainable=True)
+
+    model.compile_model(steps_per_epoch=train_steps_per_epoch, learning_rate = args.learning_rate, decay_rate=args.decay_rate)
+    model.train(
+        train_data_loader=train_loader,
+        val_data_loader=validation_loader,
+        epochs=args.epochs,
+        train_steps_per_epoch=train_steps_per_epoch,
+        val_steps_per_epoch=val_steps_per_epoch,
+        save_path=args.save_path,
+        logs_path=args.logs_path,
+        early_stopping_patience=args.early_stopping_patience
+    )
+
     # Visualize first batch
     for images, masks in train_loader.take(1):
         # Take the first batch and convert to numpy for visualization
@@ -73,14 +120,37 @@ def main():
             plt.tight_layout()
             plt.show()
 
-    model = SegmentationModel(
-        dropout_rate=args.dropout_rate,
-        pretrained=args.pretrained
-    )
-    model.summary()
-    model.visualize_model()
-
-
+    # Visualize first batch from validation set
+    for images, masks in validation_loader.take(1):
+        # Get model predictions for the batch
+        predictions = model.predict(images)
+        
+        # Convert tensors to numpy arrays
+        logger.debug(f"Images shape: {images.shape}, Masks shape: {masks.shape}")
+        images = images.numpy()
+        masks = masks.numpy()
+        
+        for i in range(images.shape[0]):
+            # Create a figure with 3 columns for each image
+            fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+            
+            # Display original image
+            ax1.imshow(images[i]/255)
+            ax1.set_title('Original Image')
+            ax1.axis('off')
+            
+            # Display ground truth mask
+            ax2.imshow(masks[i, :, :, 0], cmap='gray')
+            ax2.set_title('Ground Truth')
+            ax2.axis('off')
+            
+            # Display model prediction
+            ax3.imshow(predictions[i, :, :, 0], cmap='gray')
+            ax3.set_title('Prediction')
+            ax3.axis('off')
+            
+            plt.tight_layout()
+            plt.show()
 
     
 

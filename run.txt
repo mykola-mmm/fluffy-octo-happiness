@@ -60,4 +60,10 @@ KAGGLE ENV:
     --batch_size 32 \
     --rand_seed 42 \
     --dropout_rate 0.2 \
-    --pretrained True
+    --pretrained True \
+    --learning_rate 0.00001 \
+    --decay_rate 0.9 \
+    --epochs 10 \
+    --save_path /kaggle/working/checkpoints \
+    --logs_path /kaggle/working/logs \
+    --early_stopping_patience 10
