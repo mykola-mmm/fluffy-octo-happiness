@@ -1,8 +1,3 @@
-#TODO:
-# 1. Add adamw optimizer
-# 2. Add lr reducer for tl
-# 3. Add lr warmup for ft
-
 import os
 import logging
 import tensorflow as tf
@@ -83,39 +78,9 @@ class ClassificationModel(tf.keras.Model):
                 warmup_steps=warmup_steps,
                 min_learning_rate=min_learning_rate
             )
-            
             optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
 
-        # elif stage == "ft":
-        #     # Warmup settings
-        #     warmup_epochs = warmup_epochs
-        #     warmup_steps = steps_per_epoch * warmup_epochs
-            
-        #     # Create warmup schedule that linearly increases from 0 to target learning rate
-        #     warmup_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
-        #         initial_learning_rate=min_learning_rate,
-        #         decay_steps=warmup_steps,
-        #         end_learning_rate=learning_rate,
-        #         power=1.0  # Linear warmup
-        #     )
-            
-        #     # Create main learning rate schedule (after warmup)
-        #     main_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-        #         initial_learning_rate=learning_rate,
-        #         decay_steps=steps_per_epoch,
-        #         decay_rate=decay_rate,
-        #         staircase=True
-        #     )
-            
-        #     # Combine warmup and main schedules
-        #     lr_schedule = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
-        #         boundaries=[warmup_steps],
-        #         values=[warmup_schedule, main_schedule]
-        #     )
-            
-        #     optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
 
-        # optimizer = tf.keras.optimizers.AdamW(learning_rate=learning_rate, clipnorm=1.0)
         loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
         metrics = [
             tf.keras.metrics.Recall(),
@@ -150,14 +115,14 @@ class ClassificationModel(tf.keras.Model):
             verbose=1
         )
         
-        reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
-            monitor='val_loss',
-            factor=0.2,
-            patience=3,
-            min_lr=1e-10,
-            verbose=1,
-            mode='min'
-        )
+        # reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
+        #     monitor='val_loss',
+        #     factor=0.2,
+        #     patience=3,
+        #     min_lr=1e-10,
+        #     verbose=1,
+        #     mode='min'
+        # )
 
         log_dir = os.path.join(logs_path, stage)
         tensorboard_callback = tf.keras.callbacks.TensorBoard(
@@ -184,7 +149,8 @@ class ClassificationModel(tf.keras.Model):
             validation_data=val_data_loader,
             validation_steps=val_steps_per_epoch,
             # callbacks=[reduce_lr_callback, tensorboard_callback]
-            callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback, early_stopping_callback]
+            # callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback, early_stopping_callback]
+            callbacks=[checkpoint_callback, tensorboard_callback, early_stopping_callback]
         )
 
         if stage == "tl":

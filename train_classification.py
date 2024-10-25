@@ -1,3 +1,4 @@
+import os
 import logging
 import pandas as pd
 import tensorflow as tf
@@ -50,7 +51,9 @@ def main():
 
     model = ClassificationModel(
         dropout_rate=args.dropout_rate,
-        pretrained=args.pretrained
+        pretrained=args.pretrained,
+        l1=args.l1,
+        l2=args.l2
     )
 
     # Calculate steps per epoch
@@ -59,7 +62,7 @@ def main():
 
     # Transfer Learning phase
     model.set_backbone_trainable(trainable=False)
-    model.compile_model(stage="tl", steps_per_epoch=train_steps_per_epoch, learning_rate = args.tl_learning_rate, decay_rate=args.decay_rate)
+    model.compile_model(stage="tl", steps_per_epoch=train_steps_per_epoch, learning_rate = args.tl_learning_rate, decay_rate=args.tl_decay_rate)
     logger.debug(f"Model summary: {model.summary()}")
 
     model.train(
@@ -80,7 +83,7 @@ def main():
 
     # Fine-tuning phase
     model.set_backbone_trainable(trainable=True)  # Unfreeze the backbone
-    model.compile_model(stage="ft", learning_rate = args.ft_learning_rate, steps_per_epoch=train_steps_per_epoch, warmup_epochs=args.ft_warmup_epochs, min_learning_rate=args.ft_min_learning_rate)
+    model.compile_model(stage="ft", learning_rate = args.ft_learning_rate, steps_per_epoch=train_steps_per_epoch, warmup_epochs=args.ft_warmup_epochs, min_learning_rate=args.ft_min_learning_rate, decay_rate=args.ft_decay_rate)
 
     model.train(
         stage="ft",
@@ -94,8 +97,9 @@ def main():
         early_stopping_patience=args.early_stopping_patience
     )
 
+    # model.save_best_model(args.save_path)
     model.visualize_history('ft')
-    # model.run_inference(validation_loader)
+    model.run_inference(validation_loader)
 
 
 

@@ -3,8 +3,8 @@ LOCAL ENV:
 python ./process_csv.py \
     --csv_file_path ./airbus-ship-detection/train_ship_segmentations_v2.csv \
     --output_path ./processed_csv/classification_processed.csv \
-    --num_datapoints 1010 \
-    --ship_noship_ratio 0.2 \
+    --num_datapoints 400 \
+    --ship_noship_ratio 1 \
     --rand_seed 42
 
 python ./train_classification.py \
@@ -45,7 +45,8 @@ KAGGLE ENV:
     --pretrained True \
     --save_path /kaggle/working/checkpoints \
     --logs_path /kaggle/working/logs \
-    --decay_rate 0.9 \
+    --tl_decay_rate 0.9 \
+    --ft_decay_rate 0.8 \
     --dropout_rate 0.2 \
     --l1 0.01 \
     --l2 0.01 \
