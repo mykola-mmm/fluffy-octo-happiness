@@ -179,8 +179,8 @@ class ClassificationModel(tf.keras.Model):
             epochs=epochs,
             validation_data=val_data_loader,
             validation_steps=val_steps_per_epoch,
-            callbacks=[reduce_lr_callback, tensorboard_callback]
-            # callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback]
+            # callbacks=[reduce_lr_callback, tensorboard_callback]
+            callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback]
         )
 
         if stage == "tl":
