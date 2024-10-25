@@ -53,3 +53,11 @@ KAGGLE ENV:
     --ft_warmup_epochs 5 \
     --ft_min_learning_rate 0.000000001 \
     --early_stopping_patience 10
+
+%run ./train_segmentation.py \
+    --csv_file_path /kaggle/working/processed_csv/classification_processed.csv \
+    --dataset_path /kaggle/input/airbus-ship-detection/train_v2 \
+    --batch_size 32 \
+    --rand_seed 42 \
+    --dropout_rate 0.2 \
+    --pretrained True
