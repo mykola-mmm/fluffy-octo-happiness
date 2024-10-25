@@ -134,7 +134,7 @@ class ClassificationModel(tf.keras.Model):
         self.backbone.trainable = trainable
         logger.info(f"Backbone trainable: {self.backbone.trainable}")
 
-    def train(self, stage, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None, save_path=None):
+    def train(self, stage, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None, save_path=None, logs_path=None):
         save_path = os.path.join(save_path, stage)
         checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
         checkpoint_callback = CustomModelCheckpoint(  # Changed from tf.keras.callbacks.ModelCheckpoint
@@ -155,7 +155,7 @@ class ClassificationModel(tf.keras.Model):
             mode='min'
         )
 
-        log_dir = os.path.join(save_path, "logs", stage)
+        log_dir = os.path.join(logs_path, stage)
         tensorboard_callback = tf.keras.callbacks.TensorBoard(
             log_dir=log_dir,
             histogram_freq=1,

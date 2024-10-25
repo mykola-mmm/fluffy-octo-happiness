@@ -70,7 +70,8 @@ def main():
         epochs=args.tl_epochs,
         train_steps_per_epoch=train_steps_per_epoch,
         val_steps_per_epoch=val_steps_per_epoch,
-        save_path=args.save_path
+        save_path=args.save_path,
+        logs_path=args.logs_path
     )
 
     logger.info(f"Transfer Learning Training Completed")
@@ -87,7 +88,8 @@ def main():
         epochs=args.ft_epochs,
         train_steps_per_epoch=train_steps_per_epoch,
         val_steps_per_epoch=val_steps_per_epoch,
-        save_path=args.save_path
+        save_path=args.save_path,
+        logs_path=args.logs_path
     )
 
     model.visualize_history('ft')

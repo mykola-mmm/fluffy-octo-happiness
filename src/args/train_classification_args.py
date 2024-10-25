@@ -17,6 +17,7 @@ def process_csv_args():
     parser.add_argument("--tl_epochs", type=int, default=10, help="Transfer learning epochs")
     parser.add_argument("--ft_epochs", type=int, default=10, help="Fine tuning epochs")
     parser.add_argument("--save_path", type=str, default="./checkpoints", help="Path to save checkpoints")
+    parser.add_argument("--logs_path", type=str, default=None, help="Path to save logs")
     parser.add_argument("--decay_rate", type=float, default=0.9, help="Decay rate")
     parser.add_argument("--l1", type=float, default=0.01, help="L1 regularization")
     parser.add_argument("--l2", type=float, default=0.01, help="L2 regularization")
