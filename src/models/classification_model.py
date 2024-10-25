@@ -135,9 +135,12 @@ class ClassificationModel(tf.keras.Model):
         self.backbone.trainable = trainable
         logger.info(f"Backbone trainable: {self.backbone.trainable}")
 
-    def train(self, stage, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None, save_path=None, logs_path=None):
+    def train(self, stage, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None, save_path=None, logs_path=None, early_stopping_patience=None):
         save_path = os.path.join(save_path, stage)
+        os.makedirs(save_path, exist_ok=True)  # Add this line
+        logger.info(f"Save directory exists: {os.path.exists(save_path)}")
         checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
+        logger.info(f"Models will be saved to: {checkpoint_path}")  # Add this line
         checkpoint_callback = CustomModelCheckpoint(  # Changed from tf.keras.callbacks.ModelCheckpoint
             filepath=checkpoint_path,
             save_weights_only=False,
@@ -168,7 +171,7 @@ class ClassificationModel(tf.keras.Model):
 
         early_stopping_callback = tf.keras.callbacks.EarlyStopping(
             monitor='val_loss',
-            patience=10,  # Number of epochs with no improvement after which training will be stopped
+            patience=early_stopping_patience,  # Number of epochs with no improvement after which training will be stopped
             verbose=1,
             mode='min',
             restore_best_weights=True  # Restores the model weights from the epoch with the best value of the monitored quantity
@@ -181,15 +184,13 @@ class ClassificationModel(tf.keras.Model):
             validation_data=val_data_loader,
             validation_steps=val_steps_per_epoch,
             # callbacks=[reduce_lr_callback, tensorboard_callback]
-            callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback]
+            callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback, early_stopping_callback]
         )
 
         if stage == "tl":
             self.history_tl = history
         elif stage == "ft":
             self.history_ft = history
-        
-        
 
     def visualize_history(self, stage):
         if stage == "tl":
@@ -251,3 +252,6 @@ class ClassificationModel(tf.keras.Model):
                 plt.title(f"True: {y[i]}, Predicted: {pred[i].numpy()[0]:.2f}")
                 plt.axis('off')
                 plt.show()
+
+
+

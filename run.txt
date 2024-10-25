@@ -50,4 +50,5 @@ KAGGLE ENV:
     --l1 0.01 \
     --l2 0.01 \
     --ft_warmup_epochs 5 \
-    --ft_min_learning_rate 0.000000001
+    --ft_min_learning_rate 0.000000001 \
+    --early_stopping_patience 10

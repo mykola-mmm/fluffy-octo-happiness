@@ -70,7 +70,8 @@ def main():
         train_steps_per_epoch=train_steps_per_epoch,
         val_steps_per_epoch=val_steps_per_epoch,
         save_path=args.save_path,
-        logs_path=args.logs_path
+        logs_path=args.logs_path,
+        early_stopping_patience=args.early_stopping_patience
     )
 
     logger.info(f"Transfer Learning Training Completed")
@@ -89,22 +90,13 @@ def main():
         train_steps_per_epoch=train_steps_per_epoch,
         val_steps_per_epoch=val_steps_per_epoch,
         save_path=args.save_path,
-        logs_path=args.logs_path
+        logs_path=args.logs_path,
+        early_stopping_patience=args.early_stopping_patience
     )
 
     model.visualize_history('ft')
-    model.run_inference(validation_loader)
+    # model.run_inference(validation_loader)
 
-    # model.set_backbone_trainable(trainable=True)
-    # model.summary()
-    # model.set_backbone_trainable(trainable=False)
-    # model.summary()
-    # logger.debug(f"Model summary: {model.summary()}")
-    # x, y = next(iter(train_loader))
-    # pred = model(x)[0]
-    # logger.debug(f"pred.shape - {pred.shape}")
-    # logger.debug(f"pred - {pred}")
-    # logger.debug(f"pred.dtype - {pred.dtype}")
 
 
 if __name__ == "__main__":

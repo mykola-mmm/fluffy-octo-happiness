@@ -23,4 +23,5 @@ def process_csv_args():
     parser.add_argument("--l2", type=float, default=0.01, help="L2 regularization")
     parser.add_argument("--ft_warmup_epochs", type=int, default=5, help="Warmup epochs")
     parser.add_argument("--ft_min_learning_rate", type=float, default=0.000000001, help="Fine tuning min learning rate")
+    parser.add_argument("--early_stopping_patience", type=int, default=True, help="Early stopping patience")
     return parser.parse_args()
