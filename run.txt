@@ -67,3 +67,17 @@ KAGGLE ENV:
     --save_path /kaggle/working/checkpoints \
     --logs_path /kaggle/working/logs \
     --early_stopping_patience 10
+
+%run run_inference.py \
+    --input_dir /path/to/test/images \
+    --output_dir /path/to/save/results \
+    --classification_model_path ./trained_models/classification_model \
+    --segmentation_model_path ./trained_models/segmentation_model \
+    --batch_size 32 \
+    --confidence_threshold 0.5 \
+    --segmentation_threshold 0.5
+
+%run ./download_models.py \
+    --classification_model_url https://drive.google.com/uc?id=1iGViI8UGdx3kNVmKzfyr22LPJ_UWXxv0 \
+    --segmentation_model_url https://drive.google.com/uc?id=1t9UXzAYIiRPBteHBOR9jwPgEIDOGSCOK \
+    --output_dir /kaggle/working/trained_models

@@ -4,6 +4,7 @@ keras==3.6.0
 pandas==2.2.3
 scikit-learn==1.5.2
 keras-adamw==1.38
+gdown==5.2.0
 
 
 # BigEarthNet
