@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import tensorflow as tf
 from .rle import rle_to_mask
-
+from pathlib import Path
 def classification_data_loader(df_x, df_y, dataset_path, batch_size=32, random_state=42):
     df = pd.concat([df_x, df_y], axis=1)
     df = df.sample(frac=1, random_state=random_state).reset_index(drop=True)
@@ -50,4 +50,13 @@ def segmentation_data_loader(df_x, df_y, dataset_path, batch_size=32, random_sta
             # Stack with proper dimensions
             yield tf.stack(images), tf.stack(labels)[..., tf.newaxis]
 
+def inference_data_loader(images_dir, batch_size=32):
+    image_files = list(Path(images_dir).glob('*.jpg'))
+    image_files.extend(list(Path(images_dir).glob('*.jpeg')))  # Also include .jpeg files
+
+    for i in range(0, len(image_files), batch_size):
+        batch_files = image_files[i:i+batch_size]
+        images = [tf.io.read_file(file) for file in batch_files]
+        images = [tf.image.decode_jpeg(image, channels=3) for image in images]
+        yield tf.stack(images)
 
