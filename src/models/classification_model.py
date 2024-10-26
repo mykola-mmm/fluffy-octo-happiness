@@ -104,16 +104,16 @@ class ClassificationModel(tf.keras.Model):
         save_path = os.path.join(save_path, stage)
         os.makedirs(save_path, exist_ok=True)  # Add this line
         logger.info(f"Save directory exists: {os.path.exists(save_path)}")
-        checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
-        logger.info(f"Models will be saved to: {checkpoint_path}")  # Add this line
-        checkpoint_callback = CustomModelCheckpoint(  # Changed from tf.keras.callbacks.ModelCheckpoint
-            filepath=checkpoint_path,
-            save_weights_only=False,
-            save_best_only=True,
-            monitor='val_loss',
-            mode='min',
-            verbose=1
-        )
+        # checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
+        # logger.info(f"Models will be saved to: {checkpoint_path}")  # Add this line
+        # checkpoint_callback = CustomModelCheckpoint(  # Changed from tf.keras.callbacks.ModelCheckpoint
+        #     filepath=checkpoint_path,
+        #     save_weights_only=False,
+        #     save_best_only=True,
+        #     monitor='val_loss',
+        #     mode='min',
+        #     verbose=1
+        # )
         
         # reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
         #     monitor='val_loss',
@@ -150,13 +150,19 @@ class ClassificationModel(tf.keras.Model):
             validation_steps=val_steps_per_epoch,
             # callbacks=[reduce_lr_callback, tensorboard_callback]
             # callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback, early_stopping_callback]
-            callbacks=[checkpoint_callback, tensorboard_callback, early_stopping_callback]
+            # callbacks=[checkpoint_callback, tensorboard_callback, early_stopping_callback]
+            callbacks=[tensorboard_callback, early_stopping_callback]
         )
 
         if stage == "tl":
             self.history_tl = history
         elif stage == "ft":
             self.history_ft = history
+
+        # Save final model
+        final_model_path = os.path.join(save_path, "final_model.keras")
+        self.save(final_model_path)
+        logger.info(f"Final model saved to: {final_model_path}")
 
     def visualize_history(self, stage):
         if stage == "tl":

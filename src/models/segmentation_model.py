@@ -2,7 +2,6 @@ import os
 import logging
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from tensorflow.keras import mixed_precision
 # from src.utils.callbacks import CustomModelCheckpoint
 # from src.utils.warmup_decay_schedule import WarmupDecaySchedule
 from src.utils.dice_loss import DiceLoss
@@ -175,18 +174,9 @@ class SegmentationModel(tf.keras.Model):
             DiceLoss(smooth=1e-6, name='dice_loss'),
             tf.keras.metrics.Recall(),
             tf.keras.metrics.Precision(),
-
-            # tf.keras.metrics.F1Score(threshold=0.5),
             dice_loss
         ]
-
         super().compile(optimizer=optimizer, loss=combined_loss, metrics=metrics)
-
-    # def summary(self):
-    #     inputs = tf.keras.Input(shape=self.input_shape)
-    #     model = tf.keras.Model(inputs=inputs, outputs=self.call(inputs))
-    #     logger.debug(f"Model summary: {model.summary()}")
-    #     logger.debug(f"ClassificationModel summary: {self.backbone.summary()}")
 
     def set_backbone_trainable(self, trainable=False):
         self.backbone.trainable = trainable
@@ -240,71 +230,33 @@ class SegmentationModel(tf.keras.Model):
             validation_steps=val_steps_per_epoch,
             # callbacks=[reduce_lr_callback, tensorboard_callback]
             # callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback, early_stopping_callback]
-            callbacks=[checkpoint_callback, tensorboard_callback, early_stopping_callback]
+            # callbacks=[checkpoint_callback, tensorboard_callback, early_stopping_callback]
+            callbacks=[tensorboard_callback, early_stopping_callback]
         )
 
+        final_model_path = os.path.join(save_path, "final_model.keras")
+        final_weights_path = os.path.join(save_path, "final_weights.weights.h5")
+        self.save(final_model_path)
+        self.save_weights(final_weights_path)
+        logger.info(f"Final model saved to: {final_model_path}")
 
-    # def visualize_history(self, stage):
-    #     if stage == "tl":
-    #         history = self.history_tl
-    #         f1score_key = 'f1_score'
-    #         recall_key = 'recall'
-    #         precision_key = 'precision'
-    #         val_f1score_key = 'val_f1_score'
-    #         val_recall_key = 'val_recall'
-    #         val_precision_key = 'val_precision'
-    #     elif stage == "ft":
-    #         history = self.history_ft
-    #         f1score_key = 'f1_score'
-    #         recall_key = 'recall_1'
-    #         precision_key = 'precision_1'
-    #         val_f1score_key = 'val_f1_score'
-    #         val_recall_key = 'val_recall_1'
-    #         val_precision_key = 'val_precision_1'
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            'input_shape': self.input_shape,
+            'dropout_rate': self.dropout_rate,
+            'pretrained': self.pretrained,
+            'l1': self.l1,
+            'l2': self.l2,
+        })
+        return config
 
-    #     # logger.info(f"Visualizing history")
-    #     # logger.info(f"History: {self.history.history}")
-
-    #     fig, axes = plt.subplots(2, 2, figsize=(12, 10))  # Create a figure with 4 subplots
-
-    #     # Plot training metrics
-    #     axes[0, 0].plot(history.history[f1score_key], label='Train F1 Score')
-    #     axes[0, 0].plot(history.history[recall_key], label='Train Recall')
-    #     axes[0, 0].plot(history.history[precision_key], label='Train Precision')
-    #     axes[0, 0].set_title('Training Metrics')
-    #     axes[0, 0].legend()
-
-    #     # Plot validation metrics
-    #     axes[0, 1].plot(history.history[val_f1score_key], label='Val F1 Score')
-    #     axes[0, 1].plot(history.history[val_recall_key], label='Val Recall')
-    #     axes[0, 1].plot(history.history[val_precision_key], label='Val Precision')
-    #     axes[0, 1].set_title('Validation Metrics')
-    #     axes[0, 1].legend()
-
-    #     # Plot training loss
-    #     axes[1, 0].plot(history.history['loss'], label='Train Loss')
-    #     axes[1, 0].set_title('Training Loss')
-    #     axes[1, 0].legend()
-
-    #     # Plot validation loss
-    #     axes[1, 1].plot(history.history['val_loss'], label='Val Loss')
-    #     axes[1, 1].set_title('Validation Loss')
-    #     axes[1, 1].legend()
-
-    #     plt.tight_layout()
-    #     plt.show()
-
-    # def run_inference(self, data_loader):
-    #     for batch_index, (x, y) in enumerate(data_loader):
-    #         if batch_index >= 10:
-    #             break
-    #         pred = self(x)
-    #         for i in range(len(pred)):
-    #             plt.imshow(x[i] / 255.0)  # Normalize the image for display
-    #             plt.title(f"True: {y[i]}, Predicted: {pred[i].numpy()[0]:.2f}")
-    #             plt.axis('off')
-    #             plt.show()
-
-
-
-
+    @classmethod
+    def from_config(cls, config):
+        return cls(
+            input_shape=config['input_shape'],
+            dropout_rate=config['dropout_rate'],
+            pretrained=config['pretrained'],
+            l1=config['l1'],
+            l2=config['l2']
+        )

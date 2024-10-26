@@ -96,32 +96,32 @@ def main():
         early_stopping_patience=args.early_stopping_patience
     )
 
-    # Visualize first batch
-    for images, masks in train_loader.take(1):
-        # Take the first batch and convert to numpy for visualization
-        logger.debug(f"Images shape: {images.shape}, Masks shape: {masks.shape}")
-        images = images.numpy()
-        masks = masks.numpy()
+    # # Visualize first batch
+    # for images, masks in train_loader.take(1):
+    #     # Take the first batch and convert to numpy for visualization
+    #     logger.debug(f"Images shape: {images.shape}, Masks shape: {masks.shape}")
+    #     images = images.numpy()
+    #     masks = masks.numpy()
         
-        for i in range(images.shape[0]):
-            # Create a figure with 2 rows for each image
-            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 12))
+    #     for i in range(images.shape[0]):
+    #         # Create a figure with 2 rows for each image
+    #         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 12))
             
-            # Display original image
-            ax1.imshow(images[i]/255)
-            ax1.set_title(f'Image {i+1}')
-            ax1.axis('off')
+    #         # Display original image
+    #         ax1.imshow(images[i]/255)
+    #         ax1.set_title(f'Image {i+1}')
+    #         ax1.axis('off')
             
-            # Display mask
-            ax2.imshow(masks[i, :, :, 0], cmap='gray')
-            ax2.set_title(f'Mask {i+1}')
-            ax2.axis('off')
+    #         # Display mask
+    #         ax2.imshow(masks[i, :, :, 0], cmap='gray')
+    #         ax2.set_title(f'Mask {i+1}')
+    #         ax2.axis('off')
             
-            plt.tight_layout()
-            plt.show()
+    #         plt.tight_layout()
+    #         plt.show()
 
     # Visualize first batch from validation set
-    for images, masks in validation_loader.take(1):
+    for images, masks in validation_loader.take(10):
         # Get model predictions for the batch
         predictions = model.predict(images)
         

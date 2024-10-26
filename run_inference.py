@@ -7,21 +7,22 @@ from src.utils.data_loader import inference_data_loader
 from matplotlib import pyplot as plt
 from src.models.segmentation_model import SegmentationModel
 
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(name)s - %(levelname)s - %(message)s',
     force=True
 )
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.INFO)
 
 def main():
     args = process_inference_args()
     logger.debug(f"Args: {args}")
 
     # classification_model = tf.keras.models.load_model(args.classification_model_path)
-    segmentation_model = SegmentationModel()
-    segmentation_model = tf.keras.models.load_model(args.segmentation_model_path, compile=False)
+    classification_model = tf.keras.models.load_model(args.classification_model_path)
+    # segmentation_model = tf.keras.models.load_model(args.segmentation_model_path)
     # segmentation_model = tf.keras.models.load_model(args.segmentation_model_path)
 
     # Get all jpg files from the directory
@@ -37,17 +38,17 @@ def main():
     df.to_csv(args.output_csv_path, index=False)
     logger.info(f"Saved results to {args.output_csv_path}")
 
-    data_loader = inference_data_loader(args.images_dir)
+    data_loader = inference_data_loader(args.images_dir, batch_size=args.batch_size)
 
     inference_loader = tf.data.Dataset.from_generator(
         lambda: data_loader,
         output_signature=tf.TensorSpec(shape=(None, 768, 768, 3), dtype=tf.float32)
     )
 
-    for i, batch in enumerate(inference_loader.take(100)):
-        predictions = []
+    for i, batch in enumerate(inference_loader.take(1)):
+        # predictions = []
         pred = segmentation_model.predict(batch, verbose=0)
-        predictions.append(pred)
+        # predictions.append(pred)
         
         # Iterate through each image in the batch
         for j in range(batch.shape[0]):
@@ -61,7 +62,7 @@ def main():
             
             # Display prediction mask
             plt.subplot(1, 2, 2)
-            plt.imshow(pred[j, ..., 0], cmap='gray')  # Assuming single channel output
+            plt.imshow(pred[j], cmap='gray')  # Assuming single channel output
             plt.title('Prediction Mask')
             plt.axis('off')
             
