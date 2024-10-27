@@ -160,7 +160,9 @@ class ClassificationModel(tf.keras.Model):
 
         # Save final model
         final_model_path = os.path.join(save_path, "final_model.keras")
+        final_weights_path = os.path.join(save_path, "final_weights.weights.h5")
         self.save(final_model_path)
+        self.save_weights(final_weights_path)
         logger.info(f"Final model saved to: {final_model_path}")
 
     def visualize_history(self, stage):
