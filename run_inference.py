@@ -21,8 +21,8 @@ def main():
     logger.debug(f"Args: {args}")
 
     # classification_model = tf.keras.models.load_model(args.classification_model_path)
-    classification_model = tf.keras.models.load_model(args.classification_model_path)
-    # segmentation_model = tf.keras.models.load_model(args.segmentation_model_path)
+    # classification_model = tf.keras.models.load_model(args.classification_model_path)
+    segmentation_model = tf.keras.models.load_model(args.segmentation_model_path)
     # segmentation_model = tf.keras.models.load_model(args.segmentation_model_path)
 
     # Get all jpg files from the directory
@@ -45,9 +45,11 @@ def main():
         output_signature=tf.TensorSpec(shape=(None, 768, 768, 3), dtype=tf.float32)
     )
 
-    for i, batch in enumerate(inference_loader.take(1)):
+    for i, batch in enumerate(inference_loader.take(10)):
         # predictions = []
         pred = segmentation_model.predict(batch, verbose=0)
+        logger.info(f"pred.shape: {pred.shape}")
+        logger.info(f"batch.shape: {batch.shape}")
         # predictions.append(pred)
         
         # Iterate through each image in the batch

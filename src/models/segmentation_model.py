@@ -166,6 +166,7 @@ class SegmentationModel(tf.keras.Model):
         # bce_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
         # dice_loss = DiceLoss(smooth=1e-6, name='dice_loss')
         iou = IoU(threshold=0.5, name='iou')
+        comb_loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='combined_loss')
         # loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='combined_loss')
         loss = DiceLoss(smooth=1e-6, name='dice_loss')
 
@@ -178,7 +179,7 @@ class SegmentationModel(tf.keras.Model):
         #     dice_loss,
         #     combined_loss
         # ]
-        metrics = [iou]
+        metrics = [iou, comb_loss]
         super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     def set_backbone_trainable(self, trainable=False):
