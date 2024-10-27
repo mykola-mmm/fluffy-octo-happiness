@@ -163,18 +163,17 @@ class SegmentationModel(tf.keras.Model):
 
         # Create loss functions
         bce_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-        dice_loss = DiceLoss()
+        dice_loss = DiceLoss(smooth=1e-6, name='dice_loss')
+        iou = IoU(threshold=0.5, name='iou')
 
         # Combined loss function
         def combined_loss(y_true, y_pred):
             return bce_loss(y_true, y_pred) + dice_loss(y_true, y_pred)
 
         metrics = [
-            IoU(threshold=0.5, name='iou'),
-            DiceLoss(smooth=1e-6, name='dice_loss'),
-            tf.keras.metrics.Recall(),
-            tf.keras.metrics.Precision(),
-            dice_loss
+            iou,
+            dice_loss,
+            combined_loss
         ]
         super().compile(optimizer=optimizer, loss=combined_loss, metrics=metrics)
 
@@ -186,15 +185,15 @@ class SegmentationModel(tf.keras.Model):
         save_path = os.path.join(save_path)
         os.makedirs(save_path, exist_ok=True)  # Add this line
         logger.info(f"Models will be saved to: {save_path}")  # Add this line
-        checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
-        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-            filepath=checkpoint_path,
-            save_weights_only=False,
-            save_best_only=True,
-            monitor='val_loss',
-            mode='min',
-            verbose=1
-        )
+        # checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
+        # checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        #     filepath=checkpoint_path,
+        #     save_weights_only=False,
+        #     save_best_only=True,
+        #     monitor='val_loss',
+        #     mode='min',
+        #     verbose=1
+        # )
         
         # reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
         #     monitor='val_loss',
