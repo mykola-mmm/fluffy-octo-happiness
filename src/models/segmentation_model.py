@@ -33,13 +33,16 @@ class SegmentationModel(tf.keras.Model):
             input_shape=self.input_shape
         )
         
-        # Get the encoder blocks for skip connections
-        self.block1_conv2 = self.backbone.get_layer('block1_conv2').output
-        self.block2_conv2 = self.backbone.get_layer('block2_conv2').output
-        self.block3_conv3 = self.backbone.get_layer('block3_conv3').output
-        self.block4_conv3 = self.backbone.get_layer('block4_conv3').output
-        self.block5_conv3 = self.backbone.get_layer('block5_conv3').output
-
+        # Create an encoder model that outputs the required intermediate layers
+        outputs = [
+            self.backbone.get_layer('block1_conv2').output,
+            self.backbone.get_layer('block2_conv2').output,
+            self.backbone.get_layer('block3_conv3').output,
+            self.backbone.get_layer('block4_conv3').output,
+            self.backbone.get_layer('block5_conv3').output,
+        ]
+        self.encoder = tf.keras.Model(inputs=self.backbone.input, outputs=outputs)
+        
         # Decoder blocks
         self.up_conv4 = tf.keras.layers.Conv2DTranspose(512, (2, 2), strides=(2, 2), padding='same')
         self.up_block4 = tf.keras.Sequential([
@@ -71,37 +74,12 @@ class SegmentationModel(tf.keras.Model):
         self.final_conv = tf.keras.layers.Conv2D(1, 1, padding='same', activation='sigmoid')
 
     def call(self, inputs, training=False):
-        # Encoder path (VGG16)
-        x = tf.keras.applications.vgg16.preprocess_input(inputs)  # Changed to VGG16 to match backbone
+        # Preprocess inputs
+        x = tf.keras.applications.vgg16.preprocess_input(inputs)
         
-        # Get the actual tensor values through sequential processing
-        x = self.backbone.get_layer('block1_conv1')(x)
-        x = self.backbone.get_layer('block1_conv2')(x)
-        block1_out = x
-        x = self.backbone.get_layer('block1_pool')(x)
+        # Get all intermediate outputs from the encoder at once
+        block1_out, block2_out, block3_out, block4_out, encoder_out = self.encoder(x)
         
-        x = self.backbone.get_layer('block2_conv1')(x)
-        x = self.backbone.get_layer('block2_conv2')(x)
-        block2_out = x
-        x = self.backbone.get_layer('block2_pool')(x)
-        
-        x = self.backbone.get_layer('block3_conv1')(x)
-        x = self.backbone.get_layer('block3_conv2')(x)
-        x = self.backbone.get_layer('block3_conv3')(x)
-        block3_out = x
-        x = self.backbone.get_layer('block3_pool')(x)
-        
-        x = self.backbone.get_layer('block4_conv1')(x)
-        x = self.backbone.get_layer('block4_conv2')(x)
-        x = self.backbone.get_layer('block4_conv3')(x)
-        block4_out = x
-        x = self.backbone.get_layer('block4_pool')(x)
-        
-        x = self.backbone.get_layer('block5_conv1')(x)
-        x = self.backbone.get_layer('block5_conv2')(x)
-        x = self.backbone.get_layer('block5_conv3')(x)
-        encoder_out = x
-
         # Decoder path with skip connections
         x = self.up_conv4(encoder_out)
         x = tf.keras.layers.Concatenate()([x, block4_out])

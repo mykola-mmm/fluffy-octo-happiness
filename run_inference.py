@@ -22,55 +22,9 @@ def main():
     args = process_inference_args()
     logger.debug(f"Args: {args}")
 
-    custom_objects = {
-        'DiceLoss': DiceLoss,
-        'CombinedLoss': CombinedLoss,
-        'IoU': IoU
-    }
-    
-    try:
-        # First try loading the complete model
-        logger.info("Attempting to load complete model...")
-        logger.info(f"Loading model from: {args.segmentation_model_path}")
-        segmentation_model = tf.keras.models.load_model(
-            args.segmentation_model_path,
-            custom_objects=custom_objects,
-            compile=False
-        )
-    except Exception as e:
-        logger.warning(f"Failed to load complete model: {str(e)}")
-        logger.warning("Attempting to create new model and load weights...")
-        
-        # Create model with specific configuration
-        segmentation_model = SegmentationModel()
-        logger.info("Created new SegmentationModel instance")
-        logger.info("Model architecture:")
-        segmentation_model.summary()
-        
-        # Try loading weights with more detailed error handling
-        try:
-            logger.info(f"Attempting to load weights from: {args.segmentation_model_path}")
-            # Try to load weights in TF format first
-            try:
-                segmentation_model.load_weights(args.segmentation_model_path).expect_partial()
-            except:
-                # If that fails, try loading as HDF5
-                segmentation_model.load_weights(args.segmentation_model_path, by_name=True)
-        except Exception as weight_error:
-            logger.error(f"Failed to load weights: {str(weight_error)}")
-            logger.error("Model architecture:")
-            segmentation_model.summary()
-            logger.error(f"Weight file path: {args.segmentation_model_path}")
-            logger.error(f"Weight file exists: {Path(args.segmentation_model_path).exists()}")
-            raise Exception("Failed to load model weights. Please check model architecture and weights file.")
-    
-    # Compile model after successful loading
-    segmentation_model.compile(
-        optimizer=tf.keras.optimizers.AdamW(learning_rate=0.0001),
-        loss=DiceLoss(smooth=1e-6),
-        metrics=[IoU(threshold=0.5), CombinedLoss(dice_weight=1.0, bce_weight=1.0)]
-    )
-
+    # Load the model from .h5 file
+    logger.info(f"Loading model from {args.segmentation_model_path}")
+    segmentation_model = tf.keras.models.load_model(args.segmentation_model_path)
     logger.info("Model loaded successfully")
 
     # Get all jpg files from the directory
