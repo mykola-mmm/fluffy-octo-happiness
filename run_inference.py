@@ -5,11 +5,13 @@ from pathlib import Path
 from src.args.run_inference_args import process_inference_args
 from src.utils.data_loader import inference_data_loader
 from matplotlib import pyplot as plt
-# from src.models.segmentation_model import SegmentationModel
+from src.models.segmentation_model import SegmentationModel
+from src.utils.dice_loss import DiceLoss, CombinedLoss
+from src.utils.iou import IoU
 
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(name)s - %(levelname)s - %(message)s',
     force=True
 )
@@ -20,12 +22,56 @@ def main():
     args = process_inference_args()
     logger.debug(f"Args: {args}")
 
-    # classification_model = tf.keras.models.load_model(args.classification_model_path)
-    # classification_model = tf.keras.models.load_model(args.classification_model_path)
-    segmentation_model = tf.keras.models.load_model(args.segmentation_model_path, compile=False)
-    logger.info(f"Segmentation model summary: {segmentation_model.summary()}")
+    custom_objects = {
+        'DiceLoss': DiceLoss,
+        'CombinedLoss': CombinedLoss,
+        'IoU': IoU
+    }
     
-    # segmentation_model = tf.keras.models.load_model(args.segmentation_model_path)
+    try:
+        # First try loading the complete model
+        logger.info("Attempting to load complete model...")
+        logger.info(f"Loading model from: {args.segmentation_model_path}")
+        segmentation_model = tf.keras.models.load_model(
+            args.segmentation_model_path,
+            custom_objects=custom_objects,
+            compile=False
+        )
+    except Exception as e:
+        logger.warning(f"Failed to load complete model: {str(e)}")
+        logger.warning("Attempting to create new model and load weights...")
+        
+        # Create model with specific configuration
+        segmentation_model = SegmentationModel()
+        logger.info("Created new SegmentationModel instance")
+        logger.info("Model architecture:")
+        segmentation_model.summary()
+        
+        # Try loading weights with more detailed error handling
+        try:
+            logger.info(f"Attempting to load weights from: {args.segmentation_model_path}")
+            # Try to load weights in TF format first
+            try:
+                segmentation_model.load_weights(args.segmentation_model_path).expect_partial()
+            except:
+                # If that fails, try loading as HDF5
+                segmentation_model.load_weights(args.segmentation_model_path, by_name=True)
+        except Exception as weight_error:
+            logger.error(f"Failed to load weights: {str(weight_error)}")
+            logger.error("Model architecture:")
+            segmentation_model.summary()
+            logger.error(f"Weight file path: {args.segmentation_model_path}")
+            logger.error(f"Weight file exists: {Path(args.segmentation_model_path).exists()}")
+            raise Exception("Failed to load model weights. Please check model architecture and weights file.")
+    
+    # Compile model after successful loading
+    segmentation_model.compile(
+        optimizer=tf.keras.optimizers.AdamW(learning_rate=0.0001),
+        loss=DiceLoss(smooth=1e-6),
+        metrics=[IoU(threshold=0.5), CombinedLoss(dice_weight=1.0, bce_weight=1.0)]
+    )
+
+    logger.info("Model loaded successfully")
 
     # Get all jpg files from the directory
     image_files = list(Path(args.images_dir).glob('*.jpg'))
@@ -48,12 +94,14 @@ def main():
     )
 
     for i, batch in enumerate(inference_loader.take(10)):
-        # predictions = []
-        pred = segmentation_model(batch)
-        # pred = segmentation_model.predict(batch, verbose=0)
+        # Use model.predict instead of direct call for inference
+        pred = segmentation_model.predict(batch, verbose=0)
+        
+        # Apply threshold to predictions
+        # pred = tf.where(pred > 0.5, 1.0, 0.0)
+        
         logger.info(f"pred.shape: {pred.shape}")
         logger.info(f"batch.shape: {batch.shape}")
-        # predictions.append(pred)
         
         # Iterate through each image in the batch
         for j in range(batch.shape[0]):

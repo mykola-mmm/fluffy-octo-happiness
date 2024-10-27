@@ -96,6 +96,13 @@ def main():
         early_stopping_patience=args.early_stopping_patience
     )
 
+    # Save the trained model
+    save_path = os.path.join(args.save_path, 'final_model')
+    save_path_weights = os.path.join(args.save_path, 'final_model_weights')
+    model.save(save_path)
+    model.save_weights(save_path_weights)
+    logger.info(f"Model saved to: {save_path}")
+
     # # Visualize first batch
     # for images, masks in train_loader.take(1):
     #     # Take the first batch and convert to numpy for visualization

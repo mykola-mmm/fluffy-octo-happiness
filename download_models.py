@@ -36,7 +36,7 @@ def main():
     
     # Define output paths
     classification_model_path = os.path.join(args.output_dir, "classification_model.keras")
-    segmentation_model_path = os.path.join(args.output_dir, "segmentation_model.keras")
+    segmentation_model_path = os.path.join(args.output_dir, "segmentation_model.h5")
     
     # Download classification model
     logger.info("Downloading classification model...")
