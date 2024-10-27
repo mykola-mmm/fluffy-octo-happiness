@@ -2,7 +2,7 @@ import os
 import logging
 import tensorflow as tf
 import matplotlib.pyplot as plt
-# from src.utils.callbacks import CustomModelCheckpoint
+from src.utils.callbacks import CustomModelCheckpoint
 # from src.utils.warmup_decay_schedule import WarmupDecaySchedule
 from src.utils.dice_loss import DiceLoss
 from src.utils.dice_loss import CombinedLoss
@@ -189,25 +189,26 @@ class SegmentationModel(tf.keras.Model):
     def train(self, train_data_loader, val_data_loader, epochs=10, train_steps_per_epoch=None, val_steps_per_epoch=None, save_path=None, logs_path=None, early_stopping_patience=None):
         save_path = os.path.join(save_path)
         os.makedirs(save_path, exist_ok=True)  # Add this line
-        logger.info(f"Models will be saved to: {save_path}")  # Add this line
-        # checkpoint_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
-        # checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-        #     filepath=checkpoint_path,
-        #     save_weights_only=False,
-        #     save_best_only=True,
-        #     monitor='val_loss',
-        #     mode='min',
-        #     verbose=1
-        # )
-        
-        # reduce_lr_callback = tf.keras.callbacks.ReduceLROnPlateau(
-        #     monitor='val_loss',
-        #     factor=0.2,
-        #     patience=3,
-        #     min_lr=1e-10,
-        #     verbose=1,
-        #     mode='min'
-        # )
+        checkpoint_model_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.keras")
+        logger.info(f"BEST Model will be saved to: {checkpoint_model_path}")  # Add this line
+        checkpoint_model_callback = CustomModelCheckpoint(  # Changed from tf.keras.callbacks.ModelCheckpoint
+            filepath=checkpoint_model_path,
+            save_weights_only=False,
+            save_best_only=True,
+            monitor='val_loss',
+            mode='min',
+            verbose=1
+        )
+
+        checkpoint_weights_path = os.path.join(save_path, "model_{epoch:02d}-{val_loss:.2f}.weights.h5")
+        checkpoint_weights_callback = CustomModelCheckpoint(  # Changed from tf.keras.callbacks.ModelCheckpoint
+            filepath=checkpoint_weights_path,
+            save_weights_only=True,
+            save_best_only=True,
+            monitor='val_loss',
+            mode='min',
+            verbose=1
+        )
 
         tensorboard_callback = tf.keras.callbacks.TensorBoard(
             log_dir=logs_path,
@@ -235,14 +236,9 @@ class SegmentationModel(tf.keras.Model):
             # callbacks=[reduce_lr_callback, tensorboard_callback]
             # callbacks=[checkpoint_callback,reduce_lr_callback, tensorboard_callback, early_stopping_callback]
             # callbacks=[checkpoint_callback, tensorboard_callback, early_stopping_callback]
-            callbacks=[tensorboard_callback, early_stopping_callback]
+            # callbacks=[tensorboard_callback, early_stopping_callback]
+            callbacks=[checkpoint_model_callback, checkpoint_weights_callback, tensorboard_callback, early_stopping_callback]
         )
-
-        final_model_path = os.path.join(save_path, "final_model.keras")
-        final_weights_path = os.path.join(save_path, "final_weights.weights.h5")
-        self.save(final_model_path)
-        self.save_weights(final_weights_path)
-        logger.info(f"Final model saved to: {final_model_path}")
 
     def get_config(self):
         config = super().get_config()

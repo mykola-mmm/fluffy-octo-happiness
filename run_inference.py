@@ -5,7 +5,7 @@ from pathlib import Path
 from src.args.run_inference_args import process_inference_args
 from src.utils.data_loader import inference_data_loader
 from matplotlib import pyplot as plt
-from src.models.segmentation_model import SegmentationModel
+# from src.models.segmentation_model import SegmentationModel
 
 
 logging.basicConfig(
@@ -22,7 +22,9 @@ def main():
 
     # classification_model = tf.keras.models.load_model(args.classification_model_path)
     # classification_model = tf.keras.models.load_model(args.classification_model_path)
-    segmentation_model = tf.keras.models.load_model(args.segmentation_model_path)
+    segmentation_model = tf.keras.models.load_model(args.segmentation_model_path, compile=False)
+    logger.info(f"Segmentation model summary: {segmentation_model.summary()}")
+    
     # segmentation_model = tf.keras.models.load_model(args.segmentation_model_path)
 
     # Get all jpg files from the directory
@@ -47,7 +49,8 @@ def main():
 
     for i, batch in enumerate(inference_loader.take(10)):
         # predictions = []
-        pred = segmentation_model.predict(batch, verbose=0)
+        pred = segmentation_model(batch)
+        # pred = segmentation_model.predict(batch, verbose=0)
         logger.info(f"pred.shape: {pred.shape}")
         logger.info(f"batch.shape: {batch.shape}")
         # predictions.append(pred)
@@ -64,7 +67,8 @@ def main():
             
             # Display prediction mask
             plt.subplot(1, 2, 2)
-            plt.imshow(pred[j], cmap='gray')  # Assuming single channel output
+            # plt.imshow(pred[j], cmap='gray')  # Assuming single channel output
+            plt.imshow(pred[j, :, :, 0], cmap='gray')  # Access the first channel
             plt.title('Prediction Mask')
             plt.axis('off')
             
