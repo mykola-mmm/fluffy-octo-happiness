@@ -191,8 +191,8 @@ if __name__ == "__main__":
     logger.info("Starting train_classification")
 
     # Set mixed precision policy
-    # policy = tf.keras.mixed_precision.Policy('mixed_float16')
-    # tf.keras.mixed_precision.set_global_policy(policy)
+    policy = tf.keras.mixed_precision.Policy('mixed_float16')
+    tf.keras.mixed_precision.set_global_policy(policy)
 
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():

@@ -2,7 +2,6 @@ import os
 import logging
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from tensorflow.keras import mixed_precision
 from src.utils.callbacks import CustomModelCheckpoint
 from src.utils.warmup_decay_schedule import WarmupDecaySchedule
 
