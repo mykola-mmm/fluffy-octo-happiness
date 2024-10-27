@@ -163,10 +163,11 @@ class SegmentationModel(tf.keras.Model):
         optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
 
         # Create loss functions
-        bce_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-        dice_loss = DiceLoss(smooth=1e-6, name='dice_loss')
+        # bce_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+        # dice_loss = DiceLoss(smooth=1e-6, name='dice_loss')
         iou = IoU(threshold=0.5, name='iou')
-        combined_loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='combined_loss')
+        # loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='combined_loss')
+        loss = DiceLoss(smooth=1e-6, name='dice_loss')
 
         # # Combined loss function
         # def combined_loss(y_true, y_pred):
@@ -177,8 +178,8 @@ class SegmentationModel(tf.keras.Model):
         #     dice_loss,
         #     combined_loss
         # ]
-        metrics = [iou, dice_loss, combined_loss]
-        super().compile(optimizer=optimizer, loss=combined_loss, metrics=metrics)
+        metrics = [iou]
+        super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     def set_backbone_trainable(self, trainable=False):
         self.backbone.trainable = trainable
