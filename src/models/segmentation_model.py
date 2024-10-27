@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 # from src.utils.callbacks import CustomModelCheckpoint
 # from src.utils.warmup_decay_schedule import WarmupDecaySchedule
 from src.utils.dice_loss import DiceLoss
+from src.utils.dice_loss import CombinedLoss
 from src.utils.iou import IoU
 
 logger = logging.getLogger(__name__)
@@ -165,16 +166,18 @@ class SegmentationModel(tf.keras.Model):
         bce_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
         dice_loss = DiceLoss(smooth=1e-6, name='dice_loss')
         iou = IoU(threshold=0.5, name='iou')
+        combined_loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='combined_loss')
 
-        # Combined loss function
-        def combined_loss(y_true, y_pred):
-            return bce_loss(y_true, y_pred) + dice_loss(y_true, y_pred)
+        # # Combined loss function
+        # def combined_loss(y_true, y_pred):
+        #     return bce_loss(y_true, y_pred) + dice_loss(y_true, y_pred)
 
-        metrics = [
-            iou,
-            dice_loss,
-            combined_loss
-        ]
+        # metrics = [
+        #     iou,
+        #     dice_loss,
+        #     combined_loss
+        # ]
+        metrics = [iou, dice_loss, combined_loss]
         super().compile(optimizer=optimizer, loss=combined_loss, metrics=metrics)
 
     def set_backbone_trainable(self, trainable=False):
