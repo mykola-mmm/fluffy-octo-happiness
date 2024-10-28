@@ -97,37 +97,12 @@ def main():
     )
 
     # Save the trained model
-    save_path = os.path.join(args.save_path, 'final_model')
-    save_path_weights = os.path.join(args.save_path, 'final_model_weights')
+    save_path = os.path.join(args.save_path, 'final_model.keras')
+    save_path_weights = os.path.join(args.save_path, 'final_model.weights.h5')
     model.save(save_path)
     model.save_weights(save_path_weights)
     logger.info(f"Model saved to: {save_path}")
-
     logger.info(f"Model summary: {model.summary()}")
-
-    # # Visualize first batch
-    # for images, masks in train_loader.take(1):
-    #     # Take the first batch and convert to numpy for visualization
-    #     logger.debug(f"Images shape: {images.shape}, Masks shape: {masks.shape}")
-    #     images = images.numpy()
-    #     masks = masks.numpy()
-        
-    #     for i in range(images.shape[0]):
-    #         # Create a figure with 2 rows for each image
-    #         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 12))
-            
-    #         # Display original image
-    #         ax1.imshow(images[i]/255)
-    #         ax1.set_title(f'Image {i+1}')
-    #         ax1.axis('off')
-            
-    #         # Display mask
-    #         ax2.imshow(masks[i, :, :, 0], cmap='gray')
-    #         ax2.set_title(f'Mask {i+1}')
-    #         ax2.axis('off')
-            
-    #         plt.tight_layout()
-    #         plt.show()
 
     # Visualize first batch from validation set
     for images, masks in validation_loader.take(10):
@@ -160,6 +135,53 @@ def main():
             
             plt.tight_layout()
             plt.show()
+
+    # try:
+    #     validation_data_loader_test = segmentation_data_loader(x_val, y_val, args.dataset_path, batch_size=args.batch_size, random_state=args.rand_seed)
+    #     validation_loader_test = tf.data.Dataset.from_generator(
+    #         lambda: validation_data_loader_test,
+    #         output_signature=(
+    #             tf.TensorSpec(shape=(None, 768, 768, 3), dtype=tf.float32),
+    #             tf.TensorSpec(shape=(None, 768, 768, 1), dtype=tf.int16)
+    #         )
+    #     )
+    #     model_test = tf.keras.models.load_model(save_path)
+    #     logger.info(f"Successfully loaded model from: {save_path}")
+    #         # Visualize first batch from validation set
+    #     for images, masks in validation_loader_test.take(1):
+    #         # Get model predictions for the batch
+    #         predictions = model_test.predict(images)
+            
+    #         # Convert tensors to numpy arrays
+    #         logger.debug(f"Images shape: {images.shape}, Masks shape: {masks.shape}")
+    #         images = images.numpy()
+    #         masks = masks.numpy()
+            
+    #         for i in range(images.shape[0]):
+    #             # Create a figure with 3 columns for each image
+    #             fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+                
+    #             # Display original image
+    #             ax1.imshow(images[i]/255)
+    #             ax1.set_title('Original Image')
+    #             ax1.axis('off')
+                
+    #             # Display ground truth mask
+    #             ax2.imshow(masks[i, :, :, 0], cmap='gray')
+    #             ax2.set_title('Ground Truth')
+    #             ax2.axis('off')
+                
+    #             # Display model prediction
+    #             ax3.imshow(predictions[i, :, :, 0], cmap='gray')
+    #             ax3.set_title('Prediction')
+    #             ax3.axis('off')
+                
+    #             plt.tight_layout()
+    #             plt.show()
+    # except Exception as e:
+    #     logger.error(f"Error loading model from {save_path}: {str(e)}")
+    #     raise
+
 
     
 

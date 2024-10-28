@@ -11,16 +11,14 @@ from src.utils.iou import IoU
 logger = logging.getLogger(__name__)
 
 class SegmentationModel(tf.keras.Model):
-    def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.1, pretrained=True, l1=0.01, l2=0.01):
-        super().__init__()
+    def __init__(self, input_shape=(768, 768, 3), dropout_rate=0.1, pretrained=True, l1=0.01, l2=0.01, name=None):
+        super().__init__(name=name)
         self.input_shape = input_shape
         self.dropout_rate = dropout_rate
         self.pretrained = pretrained
         self.l1 = l1
         self.l2 = l2
-        self.build()
-        
-    def build(self):
+
         if self.pretrained:
             weights = 'imagenet'
         else:
@@ -101,7 +99,7 @@ class SegmentationModel(tf.keras.Model):
         outputs = self.final_conv(x)
 
         return outputs
-    
+
     def summary(self):
         inputs = tf.keras.Input(shape=self.input_shape)
         model = tf.keras.Model(inputs=inputs, outputs=self.call(inputs))
@@ -141,14 +139,11 @@ class SegmentationModel(tf.keras.Model):
         optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
 
         # Create loss functions
-        # bce_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-        # dice_loss = DiceLoss(smooth=1e-6, name='dice_loss')
         iou = IoU(threshold=0.5, name='iou')
-        comb_loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='combined_loss')
-        # loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='combined_loss')
+        test_loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='test_comb_loss')
         loss = DiceLoss(smooth=1e-6, name='dice_loss')
 
-        metrics = [iou, comb_loss]
+        metrics = [iou, test_loss]
         super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     def set_backbone_trainable(self, trainable=False):
@@ -212,6 +207,7 @@ class SegmentationModel(tf.keras.Model):
     def get_config(self):
         config = super().get_config()
         config.update({
+            'name': self.name,
             'input_shape': self.input_shape,
             'dropout_rate': self.dropout_rate,
             'pretrained': self.pretrained,
@@ -222,4 +218,11 @@ class SegmentationModel(tf.keras.Model):
 
     @classmethod
     def from_config(cls, config):
-        return cls(**config)
+        # Extract name from config if it exists
+        name = config.pop('name', None)
+        # Extract other Keras-specific configs that we don't need
+        config.pop('trainable', None)
+        config.pop('dtype', None)
+        
+        # Create instance with remaining config
+        return cls(**config, name=name)
