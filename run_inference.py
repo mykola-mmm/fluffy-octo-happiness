@@ -24,7 +24,15 @@ def main():
 
     # Load the model from .h5 file
     logger.info(f"Loading model from {args.segmentation_model_path}")
-    segmentation_model = tf.keras.models.load_model(args.segmentation_model_path)
+    custom_objects = {
+        'SegmentationModel': SegmentationModel,
+        'DiceLoss': DiceLoss,
+        'CombinedLoss': CombinedLoss,
+        'IoU': IoU
+    }
+
+    segmentation_model = tf.keras.models.load_model(args.segmentation_model_path, custom_objects=custom_objects)
+
     logger.info("Model loaded successfully")
 
     # Get all jpg files from the directory

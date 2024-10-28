@@ -103,6 +103,8 @@ def main():
     model.save_weights(save_path_weights)
     logger.info(f"Model saved to: {save_path}")
 
+    logger.info(f"Model summary: {model.summary()}")
+
     # # Visualize first batch
     # for images, masks in train_loader.take(1):
     #     # Take the first batch and convert to numpy for visualization

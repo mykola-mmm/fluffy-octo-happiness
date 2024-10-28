@@ -148,15 +148,6 @@ class SegmentationModel(tf.keras.Model):
         # loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='combined_loss')
         loss = DiceLoss(smooth=1e-6, name='dice_loss')
 
-        # # Combined loss function
-        # def combined_loss(y_true, y_pred):
-        #     return bce_loss(y_true, y_pred) + dice_loss(y_true, y_pred)
-
-        # metrics = [
-        #     iou,
-        #     dice_loss,
-        #     combined_loss
-        # ]
         metrics = [iou, comb_loss]
         super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
@@ -231,10 +222,4 @@ class SegmentationModel(tf.keras.Model):
 
     @classmethod
     def from_config(cls, config):
-        return cls(
-            input_shape=config['input_shape'],
-            dropout_rate=config['dropout_rate'],
-            pretrained=config['pretrained'],
-            l1=config['l1'],
-            l2=config['l2']
-        )
+        return cls(**config)
