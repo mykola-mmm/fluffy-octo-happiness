@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy import ndimage
 
 def rle_to_mask(rle_string, height=768, width=768):
     """Convert RLE string to binary mask and apply transformations:
@@ -26,8 +27,46 @@ def rle_to_mask(rle_string, height=768, width=768):
 
 def rle_decode(mask):
     """Convert binary mask to RLE string."""
+    # Return NaN if mask is empty or contains no positive values
+    if mask.size == 0 or not np.any(mask):
+        return np.nan
+        
+    # Apply inverse transformations
+    mask = np.flipud(mask)  # Inverse of mirror along x-axis
+    mask = np.rot90(mask, k=-1)  # Inverse of 90° counterclockwise rotation
+    
     pixels = mask.flatten()
-    pixels = np.concatenate([[0], pixels, [0]])
-    runs = np.where(pixels[1:] != pixels[:-1])[0] + 1
-    runs[1::2] -= runs[::2]
-    return ' '.join(str(x) for x in runs)
+    starts = []
+    lengths = []
+    
+    for i in range(len(pixels)):
+        if pixels[i] == 1:
+            starts.append(i)
+            while i < len(pixels) and pixels[i] == 1:
+                i += 1
+            lengths.append(i - starts[-1])
+    return ' '.join(f"{start} {length}" for start, length in zip(starts, lengths))
+
+def split_mask(mask):
+    """Split a binary mask into separate masks for each connected component.
+    
+    Args:
+        mask (np.ndarray): Binary mask containing multiple objects
+        
+    Returns:
+        list: List of binary masks, one for each detected object
+    """
+    # Ensure mask is binary and of correct dtype
+    mask = (mask > 0).astype(np.int32)
+    
+    # Label connected components in the mask
+    labeled_array, num_features = ndimage.label(mask)
+    
+    # Create separate masks for each labeled component
+    individual_masks = []
+    for label in range(1, num_features + 1):
+        individual_mask = (labeled_array == label).astype(np.uint8)
+        individual_masks.append(individual_mask)
+    
+    return individual_masks
+

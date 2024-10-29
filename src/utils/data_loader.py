@@ -57,8 +57,9 @@ def inference_data_loader(images_dir, batch_size=32):
 
     for i in range(0, len(image_files), batch_size):
         batch_files = image_files[i:i+batch_size]
-        # Convert PosixPath objects to strings
+        # Convert PosixPath objects to strings and store filenames
+        filenames = [file.name for file in batch_files]
         images = [tf.io.read_file(str(file)) for file in batch_files]
         images = [tf.image.decode_jpeg(image, channels=3) for image in images]
         images = [tf.cast(image, tf.float32) for image in images]
-        yield tf.stack(images)
+        yield tf.stack(images), filenames
