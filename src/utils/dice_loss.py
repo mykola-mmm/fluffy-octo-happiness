@@ -6,6 +6,10 @@ class DiceLoss(tf.keras.losses.Loss):
         self.smooth = smooth
 
     def call(self, y_true, y_pred):
+        # Cast inputs to float32
+        y_true = tf.cast(y_true, tf.float32)
+        y_pred = tf.cast(y_pred, tf.float32)
+        
         # Flatten the tensors
         y_true_flat = tf.reshape(y_true, [-1])
         y_pred_flat = tf.reshape(y_pred, [-1])
@@ -29,6 +33,10 @@ class CombinedLoss(tf.keras.losses.Loss):
         self.bce_loss = tf.keras.losses.BinaryCrossentropy()
 
     def call(self, y_true, y_pred):
+        # Cast inputs to float32
+        y_true = tf.cast(y_true, tf.float32)
+        y_pred = tf.cast(y_pred, tf.float32)
+        
         dice = self.dice_loss(y_true, y_pred)
         bce = self.bce_loss(y_true, y_pred)
         return self.bce_weight * bce + self.dice_weight * dice
