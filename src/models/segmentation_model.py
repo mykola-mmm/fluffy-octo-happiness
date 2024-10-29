@@ -69,7 +69,7 @@ class SegmentationModel(tf.keras.Model):
         ])
 
         # Final output layer
-        self.final_conv = tf.keras.layers.Conv2D(1, 1, padding='same', activation='sigmoid')
+        self.final_conv = tf.keras.layers.Conv2D(1, 1, padding='same', activation='sigmoid', dtype=tf.float32)
 
     def call(self, inputs, training=False):
         # Preprocess inputs
