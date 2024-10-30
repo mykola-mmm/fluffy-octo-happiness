@@ -139,14 +139,14 @@ class SegmentationModel(tf.keras.Model):
             staircase=True
         )
         optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
+        loss_optimizer = tf.keras.optimizers.LossScaleOptimizer(optimizer, dynamic=True)
 
         # Create loss functions
         iou = IoU(threshold=0.5, name='iou')
         loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='comb_loss')
-        # loss = DiceLoss(smooth=1e-6, name='dice_loss')
 
         metrics = [iou]
-        super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
+        super().compile(optimizer=loss_optimizer, loss=loss, metrics=metrics)
 
     def set_backbone_trainable(self, trainable=False):
         self.backbone.trainable = trainable
