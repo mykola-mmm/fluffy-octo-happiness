@@ -1,4 +1,8 @@
 import tensorflow as tf
+# import logging
+
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)
 
 class DiceLoss(tf.keras.losses.Loss):
     def __init__(self, smooth=1e-6, **kwargs):
@@ -34,8 +38,10 @@ class CombinedLoss(tf.keras.losses.Loss):
 
     def call(self, y_true, y_pred):
         # Cast inputs to float32
-        y_true = tf.cast(y_true, tf.float32)
-        y_pred = tf.cast(y_pred, tf.float32)
+        # y_true = tf.cast(y_true, tf.float32)
+        # y_pred = tf.cast(y_pred, tf.float32)
+        # logger.info(f"y_true.dtype: {y_true.dtype}")
+        # logger.info(f"y_pred.dtype: {y_pred.dtype}")
         
         dice = self.dice_loss(y_true, y_pred)
         bce = self.bce_loss(y_true, y_pred)

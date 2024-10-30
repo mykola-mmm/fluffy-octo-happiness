@@ -70,6 +70,8 @@ class SegmentationModel(tf.keras.Model):
 
         # Final output layer
         self.final_conv = tf.keras.layers.Conv2D(1, 1, padding='same', activation='sigmoid', dtype=tf.float32)
+        # self.final_conv = tf.keras.layers.Conv2D(1, 1, padding='same', activation='sigmoid')
+
 
     def call(self, inputs, training=False):
         # Preprocess inputs
@@ -140,10 +142,10 @@ class SegmentationModel(tf.keras.Model):
 
         # Create loss functions
         iou = IoU(threshold=0.5, name='iou')
-        test_loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='test_comb_loss')
-        loss = DiceLoss(smooth=1e-6, name='dice_loss')
+        loss = CombinedLoss(dice_weight=1.0, bce_weight=1.0, name='comb_loss')
+        # loss = DiceLoss(smooth=1e-6, name='dice_loss')
 
-        metrics = [iou, test_loss]
+        metrics = [iou]
         super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     def set_backbone_trainable(self, trainable=False):

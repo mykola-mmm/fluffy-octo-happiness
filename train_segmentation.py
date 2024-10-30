@@ -227,6 +227,8 @@ if __name__ == "__main__":
 
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():
+        logger.info(f"Compute dtype: {policy.compute_dtype}")
+        logger.info(f"Variable dtype: {policy.variable_dtype}")
         main()
 
     logger.info("Completed train_classification")
