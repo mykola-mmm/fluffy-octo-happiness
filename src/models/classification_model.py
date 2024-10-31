@@ -15,14 +15,9 @@ class ClassificationModel(tf.keras.Model):
         self.pretrained = pretrained
         self.l1 = l1
         self.l2 = l2
-        self.build()
         
-    def build(self):
-        if self.pretrained:
-            weights = 'imagenet'
-        else:
-            weights = None
-
+        # Move build logic here
+        weights = 'imagenet' if self.pretrained else None
         self.backbone = tf.keras.applications.VGG19(weights=weights, include_top=False, input_shape=self.input_shape, pooling='max')
 
         # Binary classification head
