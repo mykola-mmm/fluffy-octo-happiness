@@ -113,7 +113,7 @@ def main():
 
     df['EncodedPixels'] = df['EncodedPixels'].apply(clean_encoded_pixels)
 
-    # Write CSV manually to ensure proper formatting
+    # Write CSV manually to ensure proper formatting due to issues with regular CSV save function
     with open(args.output_csv_path, 'w', newline='') as f:
         f.write('ImageId,EncodedPixels\n')  # Write header
         for _, row in df.iterrows():
@@ -185,8 +185,6 @@ def main():
     #         plt.axis('off')
             
     #         plt.show()
-
-    
 
 if __name__ == "__main__":
     logger.info("Starting inference")
