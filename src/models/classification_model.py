@@ -29,7 +29,7 @@ class ClassificationModel(tf.keras.Model):
             # kernel_regularizer=tf.keras.regularizers.L1L2(l1=self.l1, l2=self.l2)  # Add L1 and L2 regularization
         )
         self.dropout = tf.keras.layers.Dropout(self.dropout_rate)
-        self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid', dtype=tf.float32)
+        self.output_layer = tf.keras.layers.Dense(1, dtype=tf.float32)
 
     def call(self, inputs, training=False):
         # x = tf.keras.applications.efficientnet_v2.preprocess_input(inputs)
@@ -74,15 +74,15 @@ class ClassificationModel(tf.keras.Model):
             )
             optimizer = tf.keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=1.0)
 
+        loss_optimizer = tf.keras.optimizers.LossScaleOptimizer(optimizer, dynamic=True)
 
-        loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+        loss = tf.keras.losses.MeanSquaredError()
         metrics = [
-            tf.keras.metrics.Recall(),
-            tf.keras.metrics.Precision(),
-            tf.keras.metrics.F1Score(threshold=0.5),
+            tf.keras.metrics.MeanAbsoluteError(),
+            tf.keras.metrics.RootMeanSquaredError(),
         ]
 
-        super().compile(optimizer=optimizer, loss=loss, metrics=metrics)
+        super().compile(optimizer=loss_optimizer, loss=loss, metrics=metrics)
 
     def summary(self):
         inputs = tf.keras.Input(shape=self.input_shape)
@@ -163,37 +163,28 @@ class ClassificationModel(tf.keras.Model):
     def visualize_history(self, stage):
         if stage == "tl":
             history = self.history_tl
-            f1score_key = 'f1_score'
-            recall_key = 'recall'
-            precision_key = 'precision'
-            val_f1score_key = 'val_f1_score'
-            val_recall_key = 'val_recall'
-            val_precision_key = 'val_precision'
+            mae_key = 'mean_absolute_error'
+            rmse_key = 'root_mean_squared_error'
+            val_mae_key = 'val_mean_absolute_error'
+            val_rmse_key = 'val_root_mean_squared_error'
         elif stage == "ft":
             history = self.history_ft
-            f1score_key = 'f1_score'
-            recall_key = 'recall_1'
-            precision_key = 'precision_1'
-            val_f1score_key = 'val_f1_score'
-            val_recall_key = 'val_recall_1'
-            val_precision_key = 'val_precision_1'
+            mae_key = 'mean_absolute_error'
+            rmse_key = 'root_mean_squared_error'
+            val_mae_key = 'val_mean_absolute_error'
+            val_rmse_key = 'val_root_mean_squared_error'
 
-        # logger.info(f"Visualizing history")
-        # logger.info(f"History: {self.history.history}")
-
-        fig, axes = plt.subplots(2, 2, figsize=(12, 10))  # Create a figure with 4 subplots
+        fig, axes = plt.subplots(2, 2, figsize=(12, 10))
 
         # Plot training metrics
-        axes[0, 0].plot(history.history[f1score_key], label='Train F1 Score')
-        axes[0, 0].plot(history.history[recall_key], label='Train Recall')
-        axes[0, 0].plot(history.history[precision_key], label='Train Precision')
+        axes[0, 0].plot(history.history[mae_key], label='Train MAE')
+        axes[0, 0].plot(history.history[rmse_key], label='Train RMSE')
         axes[0, 0].set_title('Training Metrics')
         axes[0, 0].legend()
 
         # Plot validation metrics
-        axes[0, 1].plot(history.history[val_f1score_key], label='Val F1 Score')
-        axes[0, 1].plot(history.history[val_recall_key], label='Val Recall')
-        axes[0, 1].plot(history.history[val_precision_key], label='Val Precision')
+        axes[0, 1].plot(history.history[val_mae_key], label='Val MAE')
+        axes[0, 1].plot(history.history[val_rmse_key], label='Val RMSE')
         axes[0, 1].set_title('Validation Metrics')
         axes[0, 1].legend()
 
@@ -216,8 +207,8 @@ class ClassificationModel(tf.keras.Model):
                 break
             pred = self(x)
             for i in range(len(pred)):
-                plt.imshow(x[i] / 255.0)  # Normalize the image for display
-                plt.title(f"True: {y[i]}, Predicted: {pred[i].numpy()[0]:.2f}")
+                plt.imshow(x[i] / 255.0)
+                plt.title(f"True: {y[i]}, Predicted: {pred[i].numpy()[0]:.1f}")
                 plt.axis('off')
                 plt.show()
 
